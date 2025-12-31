@@ -1,0 +1,1433 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red31\green31\blue31;\red164\green15\blue13;\red255\green255\blue255;
+\red64\green64\blue64;\red0\green0\blue0;\red15\green55\blue114;\red230\green0\blue6;\red108\green18\blue48;
+\red74\green16\blue174;\red0\green0\blue109;\red21\green76\blue96;\red16\green92\blue56;\red196\green83\blue86;
+}
+{\*\expandedcolortbl;;\cssrgb\c16078\c16078\c16078;\cssrgb\c70980\c12549\c5098;\cssrgb\c100000\c100000\c100000;
+\cssrgb\c31765\c31765\c31765;\cssrgb\c0\c0\c0;\cssrgb\c5882\c29020\c52157;\cssrgb\c93333\c0\c0;\cssrgb\c50588\c12157\c24706;
+\cssrgb\c36863\c17255\c73725;\cssrgb\c0\c6275\c50196;\cssrgb\c9412\c36863\c45098;\cssrgb\c3529\c42745\c28235;\cssrgb\c81961\c41176\c41176;
+}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  os\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  re\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  json\cb1 \
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  pathlib \cf3 \strokec3 import\cf2 \strokec2  Path\cb1 \
+\
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  numpy \cf3 \strokec3 as\cf2 \strokec2  np\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  pandas \cf3 \strokec3 as\cf2 \strokec2  pd\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 1) CONFIG\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 DATA_DIR \strokec6 =\strokec2  Path(\cf7 \strokec7 ""\cf2 \strokec2 )\cb1 \
+\cb4 INPUT_FILENAME \strokec6 =\strokec2  \cf7 \strokec7 "data.xlsx"\cf2 \strokec2  \cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Your exact column names (must match file header)\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 EXPECTED_COLUMNS \strokec6 =\strokec2  [\cb1 \
+\cb4     \cf7 \strokec7 "Rank"\cf2 \strokec2 , \cf7 \strokec7 "University"\cf2 \strokec2 , \cf7 \strokec7 "Country"\cf2 \strokec2 , \cf7 \strokec7 "Program"\cf2 \strokec2 , \cf7 \strokec7 "official title"\cf2 \strokec2 , \cf7 \strokec7 "Degree Level"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Launch Year / Period"\cf2 \strokec2 , \cf7 \strokec7 "Language of Instruction"\cf2 \strokec2 , \cf7 \strokec7 "Duration"\cf2 \strokec2 , \cf7 \strokec7 "Mode of Delivery"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Primary Field"\cf2 \strokec2 , \cf7 \strokec7 "Subfield(s)"\cf2 \strokec2 , \cf7 \strokec7 "Interdisciplinary Linkages"\cf2 \strokec2 , \cf7 \strokec7 "Key Technical Skills"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Analytical Skills"\cf2 \strokec2 , \cf7 \strokec7 "Soft / Professional Skills"\cf2 \strokec2 , \cf7 \strokec7 "Research Capabilities"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Objectives"\cf2 \strokec2 , \cf7 \strokec7 "Drivers"\cf2 \strokec2 , \cf7 \strokec7 "Audiences"\cf2 \strokec2 , \cf7 \strokec7 "Career Pathways"\cf2 \strokec2 , \cf7 \strokec7 "Industrial Linkage Evidence"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Limitations"\cf2 \strokec2 , \cf7 \strokec7 "Innovative Aspects"\cf2 \strokec2 , \cf7 \strokec7 "Relevance for Iran"\cf2 \cb1 \strokec2 \
+\cb4 ]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Text-heavy columns (for your later NLP pipeline)\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 TEXT_COLUMNS \strokec6 =\strokec2  [\cb1 \
+\cb4     \cf7 \strokec7 "Program"\cf2 \strokec2 , \cf7 \strokec7 "official title"\cf2 \strokec2 , \cf7 \strokec7 "Primary Field"\cf2 \strokec2 , \cf7 \strokec7 "Subfield(s)"\cf2 \strokec2 , \cf7 \strokec7 "Interdisciplinary Linkages"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Key Technical Skills"\cf2 \strokec2 , \cf7 \strokec7 "Analytical Skills"\cf2 \strokec2 , \cf7 \strokec7 "Soft / Professional Skills"\cf2 \strokec2 , \cf7 \strokec7 "Research Capabilities"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Objectives"\cf2 \strokec2 , \cf7 \strokec7 "Drivers"\cf2 \strokec2 , \cf7 \strokec7 "Audiences"\cf2 \strokec2 , \cf7 \strokec7 "Career Pathways"\cf2 \strokec2 , \cf7 \strokec7 "Industrial Linkage Evidence"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Limitations"\cf2 \strokec2 , \cf7 \strokec7 "Innovative Aspects"\cf2 \strokec2 , \cf7 \strokec7 "Relevance for Iran"\cf2 \cb1 \strokec2 \
+\cb4 ]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Categorical columns (light cleaning only)\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 CATEGORICAL_COLUMNS \strokec6 =\strokec2  [\cb1 \
+\cb4     \cf7 \strokec7 "University"\cf2 \strokec2 , \cf7 \strokec7 "Country"\cf2 \strokec2 , \cf7 \strokec7 "Degree Level"\cf2 \strokec2 , \cf7 \strokec7 "Language of Instruction"\cf2 \strokec2 , \cf7 \strokec7 "Duration"\cf2 \strokec2 , \cf7 \strokec7 "Mode of Delivery"\cf2 \cb1 \strokec2 \
+\cb4 ]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Numeric-like columns\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 NUMERIC_COLUMNS \strokec6 =\strokec2  [\cf7 \strokec7 "Rank"\cf2 \strokec2 ]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Cells that should be treated as missing (NaN) \'97 without filling\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 MISSING_TOKENS \strokec6 =\strokec2  \{\cb1 \
+\cb4     \cf7 \strokec7 ""\cf2 \strokec2 , \cf7 \strokec7 " "\cf2 \strokec2 , \cf7 \strokec7 "  "\cf2 \strokec2 , \cf7 \strokec7 "\cf8 \strokec8 \\t\cf7 \strokec7 "\cf2 \strokec2 , \cf7 \strokec7 "\cf8 \strokec8 \\n\cf7 \strokec7 "\cf2 \strokec2 , \cf7 \strokec7 "\cf8 \strokec8 \\r\cf7 \strokec7 "\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "-"\cf2 \strokec2 , \cf7 \strokec7 "\'97"\cf2 \strokec2 , \cf7 \strokec7 "\'96"\cf2 \strokec2 , \cf7 \strokec7 "_"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "none"\cf2 \strokec2 , \cf7 \strokec7 "None"\cf2 \strokec2 , \cf7 \strokec7 "NONE"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "null"\cf2 \strokec2 , \cf7 \strokec7 "NULL"\cf2 \strokec2 , \cf7 \strokec7 "Null"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "nan"\cf2 \strokec2 , \cf7 \strokec7 "NaN"\cf2 \strokec2 , \cf7 \strokec7 "NAN"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "n/a"\cf2 \strokec2 , \cf7 \strokec7 "N/A"\cf2 \strokec2 , \cf7 \strokec7 "na"\cf2 \strokec2 , \cf7 \strokec7 "NA"\cf2 \strokec2 ,\cb1 \
+\cb4 \}\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Regex for multiple whitespace\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 RE_MULTI_WS \strokec6 =\strokec2  re.compile(\cf7 \strokec7 r\cf9 \strokec9 "\\s\cf2 \strokec6 +\cf9 \strokec9 "\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 2) HELPERS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 find_input_file\cf2 \strokec2 (\cf11 \strokec11 data_dir\cf2 \strokec2 : \cf12 \strokec12 Path\cf2 \strokec2 , \cf11 \strokec11 forced_name\cf2 \strokec2 : \cf12 \strokec12 str\cf2 \strokec2  \strokec6 |\strokec2  \cf12 \strokec12 None\cf2 \strokec2  \strokec6 =\strokec2  \cf12 \strokec12 None\cf2 \strokec2 ) -> \cf12 \strokec12 Path\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  forced_name:\cb1 \
+\cb4         p \strokec6 =\strokec2  data_dir \strokec6 /\strokec2  forced_name\cb1 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  p.exists():\cb1 \
+\cb4             \cf3 \strokec3 raise\cf2 \strokec2  \cf12 \strokec12 FileNotFoundError\cf2 \strokec2 (\cf7 \strokec7 f"INPUT_FILENAME was set but file not found: \{\cf2 \strokec2 p\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  p\cb1 \
+\
+\cb4     candidates \strokec6 =\strokec2  []\cb1 \
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  ext \cf3 \strokec3 in\cf2 \strokec2  (\cf7 \strokec7 "*.xlsx"\cf2 \strokec2 , \cf7 \strokec7 "*.xls"\cf2 \strokec2 , \cf7 \strokec7 "*.csv"\cf2 \strokec2 ):\cb1 \
+\cb4         candidates.extend(\cf10 \strokec10 sorted\cf2 \strokec2 (data_dir.glob(ext)))\cb1 \
+\
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  candidates:\cb1 \
+\cb4         \cf3 \strokec3 raise\cf2 \strokec2  \cf12 \strokec12 FileNotFoundError\cf2 \strokec2 (\cf7 \strokec7 f"No .xlsx/.xls/.csv files found in: \{\cf2 \strokec2 data_dir\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\
+\cb4     \cf5 \strokec5 # pick the most recently modified file\cf2 \cb1 \strokec2 \
+\cb4     candidates.sort(\cf11 \strokec11 key\cf2 \strokec6 =\cf7 \strokec7 lambda\cf2 \strokec2  \cf11 \strokec11 x\cf2 \strokec2 : x.stat().st_mtime, \cf11 \strokec11 reverse\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 )\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  candidates[\cf13 \strokec13 0\cf2 \strokec2 ]\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 normalize_missing\cf2 \strokec2 (\cf11 \strokec11 x\cf2 \strokec2 ):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf7 \strokec7 """\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7     Convert tokens like '-', 'none', '', etc. to np.nan.\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     IMPORTANT: does not fill missing; only standardizes.\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     """\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  x \cf7 \strokec7 is\cf2 \strokec2  \cf7 \strokec7 None\cf2 \strokec2 :\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf10 \strokec10 isinstance\cf2 \strokec2 (x, \cf12 \strokec12 float\cf2 \strokec2 ) \cf7 \strokec7 and\cf2 \strokec2  np.isnan(x):\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf10 \strokec10 isinstance\cf2 \strokec2 (x, \cf12 \strokec12 str\cf2 \strokec2 ):\cb1 \
+\cb4         s \strokec6 =\strokec2  x.strip()\cb1 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  s \cf7 \strokec7 in\cf2 \strokec2  MISSING_TOKENS:\cb1 \
+\cb4             \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4         \cf5 \strokec5 # also treat strings that become missing after stripping punctuation-like dashes\cf2 \cb1 \strokec2 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  s.lower() \cf7 \strokec7 in\cf2 \strokec2  \{t.lower() \cf3 \strokec3 for\cf2 \strokec2  t \cf3 \strokec3 in\cf2 \strokec2  MISSING_TOKENS\}:\cb1 \
+\cb4             \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  x\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  x\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 clean_text_keep_nan\cf2 \strokec2 (\cf11 \strokec11 x\cf2 \strokec2 ):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf7 \strokec7 """\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7     Clean text ONLY if not missing.\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     - strip edges\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     - collapse whitespace\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     - keep original case (recommended for program titles) OR set lower() if you want\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     """\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  x \cf7 \strokec7 is\cf2 \strokec2  \cf7 \strokec7 None\cf2 \strokec2  \cf7 \strokec7 or\cf2 \strokec2  (\cf10 \strokec10 isinstance\cf2 \strokec2 (x, \cf12 \strokec12 float\cf2 \strokec2 ) \cf7 \strokec7 and\cf2 \strokec2  np.isnan(x)):\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\
+\cb4     \cf5 \strokec5 # If numeric accidentally ended up in a text col, keep as string (but do not fabricate)\cf2 \cb1 \strokec2 \
+\cb4     s \strokec6 =\strokec2  \cf12 \strokec12 str\cf2 \strokec2 (x)\cb1 \
+\
+\cb4     s \strokec6 =\strokec2  s.strip()\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  s \cf7 \strokec7 in\cf2 \strokec2  MISSING_TOKENS \cf7 \strokec7 or\cf2 \strokec2  s.lower() \cf7 \strokec7 in\cf2 \strokec2  \{t.lower() \cf3 \strokec3 for\cf2 \strokec2  t \cf3 \strokec3 in\cf2 \strokec2  MISSING_TOKENS\}:\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\
+\cb4     \cf5 \strokec5 # normalize whitespace\cf2 \cb1 \strokec2 \
+\cb4     s \strokec6 =\strokec2  RE_MULTI_WS.sub(\cf7 \strokec7 " "\cf2 \strokec2 , s)\cb1 \
+\
+\cb4     \cf5 \strokec5 # remove invisible unicode spaces\cf2 \cb1 \strokec2 \
+\cb4     s \strokec6 =\strokec2  s.replace(\cf7 \strokec7 "\cf8 \strokec8 \\u200c\cf7 \strokec7 "\cf2 \strokec2 , \cf7 \strokec7 " "\cf2 \strokec2 ).replace(\cf7 \strokec7 "\cf8 \strokec8 \\u200f\cf7 \strokec7 "\cf2 \strokec2 , \cf7 \strokec7 " "\cf2 \strokec2 ).replace(\cf7 \strokec7 "\cf8 \strokec8 \\ufeff\cf7 \strokec7 "\cf2 \strokec2 , \cf7 \strokec7 ""\cf2 \strokec2 )\cb1 \
+\
+\cb4     \cf5 \strokec5 # final trim\cf2 \cb1 \strokec2 \
+\cb4     s \strokec6 =\strokec2  s.strip()\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  s \cf7 \strokec7 or\cf2 \strokec2  s \cf7 \strokec7 in\cf2 \strokec2  MISSING_TOKENS \cf7 \strokec7 or\cf2 \strokec2  s.lower() \cf7 \strokec7 in\cf2 \strokec2  \{t.lower() \cf3 \strokec3 for\cf2 \strokec2  t \cf3 \strokec3 in\cf2 \strokec2  MISSING_TOKENS\}:\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  s\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 coerce_rank_to_int_keep_nan\cf2 \strokec2 (\cf11 \strokec11 x\cf2 \strokec2 ):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  x \cf7 \strokec7 is\cf2 \strokec2  \cf7 \strokec7 None\cf2 \strokec2  \cf7 \strokec7 or\cf2 \strokec2  (\cf10 \strokec10 isinstance\cf2 \strokec2 (x, \cf12 \strokec12 float\cf2 \strokec2 ) \cf7 \strokec7 and\cf2 \strokec2  np.isnan(x)):\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf10 \strokec10 isinstance\cf2 \strokec2 (x, (\cf12 \strokec12 int\cf2 \strokec2 , np.integer)):\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  \cf12 \strokec12 int\cf2 \strokec2 (x)\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf10 \strokec10 isinstance\cf2 \strokec2 (x, \cf12 \strokec12 float\cf2 \strokec2 ):\cb1 \
+\cb4         \cf5 \strokec5 # 1.0 -> 1\cf2 \cb1 \strokec2 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  np.isfinite(x):\cb1 \
+\cb4             \cf3 \strokec3 return\cf2 \strokec2  \cf12 \strokec12 int\cf2 \strokec2 (x)\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4     s \strokec6 =\strokec2  \cf12 \strokec12 str\cf2 \strokec2 (x).strip()\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  s \cf7 \strokec7 in\cf2 \strokec2  MISSING_TOKENS \cf7 \strokec7 or\cf2 \strokec2  s.lower() \cf7 \strokec7 in\cf2 \strokec2  \{t.lower() \cf3 \strokec3 for\cf2 \strokec2  t \cf3 \strokec3 in\cf2 \strokec2  MISSING_TOKENS\}:\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4     \cf5 \strokec5 # extract digits\cf2 \cb1 \strokec2 \
+\cb4     m \strokec6 =\strokec2  re.search(\cf7 \strokec7 r\cf9 \strokec9 "\\d\cf2 \strokec6 +\cf9 \strokec9 "\cf2 \strokec2 , s)\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  m:\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  np.nan\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  \cf12 \strokec12 int\cf2 \strokec2 (m.group(\cf13 \strokec13 0\cf2 \strokec2 ))\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 standardize_columns\cf2 \strokec2 (\cf11 \strokec11 df\cf2 \strokec2 : pd.DataFrame) -> pd.DataFrame:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf7 \strokec7 """\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7     Make column names consistent:\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     - strip\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     - collapse multiple spaces\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     - keep original wording as much as possible\cf2 \cb1 \strokec2 \
+\cf7 \cb4 \strokec7     """\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     df \strokec6 =\strokec2  df.copy()\cb1 \
+\cb4     new_cols \strokec6 =\strokec2  []\cb1 \
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  df.columns:\cb1 \
+\cb4         cc \strokec6 =\strokec2  \cf12 \strokec12 str\cf2 \strokec2 (c).strip()\cb1 \
+\cb4         cc \strokec6 =\strokec2  RE_MULTI_WS.sub(\cf7 \strokec7 " "\cf2 \strokec2 , cc)\cb1 \
+\cb4         new_cols.append(cc)\cb1 \
+\cb4     df.columns \strokec6 =\strokec2  new_cols\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  df\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 validate_expected_columns\cf2 \strokec2 (\cf11 \strokec11 df\cf2 \strokec2 : pd.DataFrame):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     missing \strokec6 =\strokec2  [c \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  EXPECTED_COLUMNS \cf3 \strokec3 if\cf2 \strokec2  c \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  df.columns]\cb1 \
+\cb4     extra \strokec6 =\strokec2  [c \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  df.columns \cf3 \strokec3 if\cf2 \strokec2  c \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  EXPECTED_COLUMNS]\cb1 \
+\cb4     \cf5 \strokec5 # We do not hard-fail on extra columns; but we warn.\cf2 \cb1 \strokec2 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  missing, extra\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 3) LOAD\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 input_path \strokec6 =\strokec2  find_input_file(DATA_DIR, INPUT_FILENAME)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  input_path.suffix.lower() \cf7 \strokec7 in\cf2 \strokec2  [\cf7 \strokec7 ".xlsx"\cf2 \strokec2 , \cf7 \strokec7 ".xls"\cf2 \strokec2 ]:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     df \strokec6 =\strokec2  pd.read_excel(input_path, \cf11 \strokec11 dtype\cf2 \strokec6 =\cf12 \strokec12 object\cf2 \strokec2 )  \cf5 \strokec5 # dtype=object to preserve everything\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 elif\cf2 \strokec2  input_path.suffix.lower() \strokec6 ==\strokec2  \cf7 \strokec7 ".csv"\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf5 \strokec5 # keep_default_na=False so pandas doesn't auto-convert tokens; we handle ourselves\cf2 \cb1 \strokec2 \
+\cb4     df \strokec6 =\strokec2  pd.read_csv(input_path, \cf11 \strokec11 dtype\cf2 \strokec6 =\cf12 \strokec12 object\cf2 \strokec2 , \cf11 \strokec11 keep_default_na\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 , \cf11 \strokec11 encoding\cf2 \strokec6 =\cf7 \strokec7 "utf-8"\cf2 \strokec2 )\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 else\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 raise\cf2 \strokec2  \cf12 \strokec12 ValueError\cf2 \strokec2 (\cf7 \strokec7 f"Unsupported file type: \{\cf2 \strokec2 input_path.suffix\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\
+\cb4 df \strokec6 =\strokec2  standardize_columns(df)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 4) BASIC CHECKS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 report \strokec6 =\strokec2  \{\cb1 \
+\cb4     \cf7 \strokec7 "input_file"\cf2 \strokec2 : \cf12 \strokec12 str\cf2 \strokec2 (input_path),\cb1 \
+\cb4     \cf7 \strokec7 "rows_original"\cf2 \strokec2 : \cf12 \strokec12 int\cf2 \strokec2 (df.shape[\cf13 \strokec13 0\cf2 \strokec2 ]),\cb1 \
+\cb4     \cf7 \strokec7 "cols_original"\cf2 \strokec2 : \cf12 \strokec12 int\cf2 \strokec2 (df.shape[\cf13 \strokec13 1\cf2 \strokec2 ]),\cb1 \
+\cb4     \cf7 \strokec7 "warnings"\cf2 \strokec2 : [],\cb1 \
+\cb4 \}\cb1 \
+\
+\cb4 missing_cols, extra_cols \strokec6 =\strokec2  validate_expected_columns(df)\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  missing_cols:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     report[\cf7 \strokec7 "warnings"\cf2 \strokec2 ].append(\cb1 \
+\cb4         \cf7 \strokec7 f"Missing expected columns (check header spelling): \{\cf2 \strokec2 missing_cols\cf7 \strokec7 \}"\cf2 \cb1 \strokec2 \
+\cb4     )\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  extra_cols:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     report[\cf7 \strokec7 "warnings"\cf2 \strokec2 ].append(\cb1 \
+\cb4         \cf7 \strokec7 f"Extra columns present (kept as-is): \{\cf2 \strokec2 extra_cols\cf7 \strokec7 \}"\cf2 \cb1 \strokec2 \
+\cb4     )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Ensure expected columns exist (create as NaN if absent, but do NOT fill with content)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # This does not violate your rule; it only preserves schema for downstream pipeline.\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  EXPECTED_COLUMNS:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  c \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  df.columns:\cb1 \
+\cb4         df[c] \strokec6 =\strokec2  np.nan\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Reorder columns\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df \strokec6 =\strokec2  df[EXPECTED_COLUMNS \strokec6 +\strokec2  [c \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  df.columns \cf3 \strokec3 if\cf2 \strokec2  c \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  EXPECTED_COLUMNS]]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 5) NORMALIZE MISSING TOKENS (NO IMPUTATION)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  col \cf3 \strokec3 in\cf2 \strokec2  df.columns:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     df[col] \strokec6 =\strokec2  df[col].map(normalize_missing)\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 6) TYPE-SAFE CLEANING\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # Rank -> numeric (keep NaN)\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 "Rank"\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  df.columns:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     df[\cf7 \strokec7 "Rank"\cf2 \strokec2 ] \strokec6 =\strokec2  df[\cf7 \strokec7 "Rank"\cf2 \strokec2 ].apply(coerce_rank_to_int_keep_nan)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Clean categorical columns (light text normalization, keep NaN)\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  CATEGORICAL_COLUMNS:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  c \cf7 \strokec7 in\cf2 \strokec2  df.columns:\cb1 \
+\cb4         df[c] \strokec6 =\strokec2  df[c].apply(clean_text_keep_nan)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Clean text columns (for NLP later), keep NaN\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  TEXT_COLUMNS:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  c \cf7 \strokec7 in\cf2 \strokec2  df.columns:\cb1 \
+\cb4         df[c] \strokec6 =\strokec2  df[c].apply(clean_text_keep_nan)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Optional: strip whitespace for all remaining object columns, without changing NaN\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  df.columns:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  df[c].dtype \strokec6 ==\strokec2  \cf7 \strokec7 "object"\cf2 \strokec2  \cf7 \strokec7 and\cf2 \strokec2  c \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  (TEXT_COLUMNS \strokec6 +\strokec2  CATEGORICAL_COLUMNS):\cb1 \
+\cb4         df[c] \strokec6 =\strokec2  df[c].apply(clean_text_keep_nan)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 7) CONSISTENCY CHECKS (NON-DESTRUCTIVE)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # Do not drop rows; only report.\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 na_counts \strokec6 =\strokec2  df.isna().sum().to_dict()\cb1 \
+\cb4 report[\cf7 \strokec7 "missing_counts_per_column"\cf2 \strokec2 ] \strokec6 =\strokec2  \{k: \cf12 \strokec12 int\cf2 \strokec2 (v) \cf3 \strokec3 for\cf2 \strokec2  k, v \cf3 \strokec3 in\cf2 \strokec2  na_counts.items()\}\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Rank uniqueness / range quick checks\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 "Rank"\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  df.columns:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     finite_ranks \strokec6 =\strokec2  df[\cf7 \strokec7 "Rank"\cf2 \strokec2 ].dropna().astype(\cf12 \strokec12 int\cf2 \strokec2 )\cb1 \
+\cb4     report[\cf7 \strokec7 "rank_min"\cf2 \strokec2 ] \strokec6 =\strokec2  \cf12 \strokec12 int\cf2 \strokec2 (finite_ranks.min()) \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  finite_ranks.empty \cf3 \strokec3 else\cf2 \strokec2  \cf7 \strokec7 None\cf2 \cb1 \strokec2 \
+\cb4     report[\cf7 \strokec7 "rank_max"\cf2 \strokec2 ] \strokec6 =\strokec2  \cf12 \strokec12 int\cf2 \strokec2 (finite_ranks.max()) \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  finite_ranks.empty \cf3 \strokec3 else\cf2 \strokec2  \cf7 \strokec7 None\cf2 \cb1 \strokec2 \
+\cb4     report[\cf7 \strokec7 "rank_unique_count"\cf2 \strokec2 ] \strokec6 =\strokec2  \cf12 \strokec12 int\cf2 \strokec2 (finite_ranks.nunique()) \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  finite_ranks.empty \cf3 \strokec3 else\cf2 \strokec2  \cf13 \strokec13 0\cf2 \cb1 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Row count expectation check\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  df.shape[\cf13 \strokec13 0\cf2 \strokec2 ] \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  (\cf13 \strokec13 491\cf2 \strokec2 , \cf13 \strokec13 492\cf2 \strokec2 ):  \cf5 \strokec5 # you said 492 total including header => 491 data rows, but some files include 492 data rows\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     report[\cf7 \strokec7 "warnings"\cf2 \strokec2 ].append(\cb1 \
+\cb4         \cf7 \strokec7 f"Row count is \{\cf2 \strokec2 df.shape[\cf13 \strokec13 0\cf2 \strokec2 ]\cf7 \strokec7 \}. You expected ~491/492. Verify file export."\cf2 \cb1 \strokec2 \
+\cb4     )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 8) SAVE OUTPUTS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 out_parquet \strokec6 =\strokec2  DATA_DIR \strokec6 /\strokec2  \cf7 \strokec7 "cleaned_dataset.parquet"\cf2 \cb1 \strokec2 \
+\cb4 out_xlsx \strokec6 =\strokec2  DATA_DIR \strokec6 /\strokec2  \cf7 \strokec7 "cleaned_dataset.xlsx"\cf2 \cb1 \strokec2 \
+\cb4 out_csv \strokec6 =\strokec2  DATA_DIR \strokec6 /\strokec2  \cf7 \strokec7 "cleaned_dataset.csv"\cf2 \cb1 \strokec2 \
+\cb4 out_report \strokec6 =\strokec2  DATA_DIR \strokec6 /\strokec2  \cf7 \strokec7 "preprocessing_report.json"\cf2 \cb1 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Parquet preserves NaN + types best\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df.to_parquet(out_parquet, \cf11 \strokec11 index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Excel/CSV for convenience (NaN becomes empty cells)\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df.to_excel(out_xlsx, \cf11 \strokec11 index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\cb4 df.to_csv(out_csv, \cf11 \strokec11 index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 , \cf11 \strokec11 encoding\cf2 \strokec6 =\cf7 \strokec7 "utf-8-sig"\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 with\cf2 \strokec2  \cf10 \strokec10 open\cf2 \strokec2 (out_report, \cf7 \strokec7 "w"\cf2 \strokec2 , \cf11 \strokec11 encoding\cf2 \strokec6 =\cf7 \strokec7 "utf-8"\cf2 \strokec2 ) \cf3 \strokec3 as\cf2 \strokec2  f:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     json.dump(report, f, \cf11 \strokec11 ensure_ascii\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 , \cf11 \strokec11 indent\cf2 \strokec6 =\cf13 \strokec13 2\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 "Done."\cf2 \strokec2 )\cb1 \
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 f"Input:  \{\cf2 \strokec2 input_path\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 f"Saved:  \{\cf2 \strokec2 out_parquet\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 f"Saved:  \{\cf2 \strokec2 out_xlsx\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 f"Saved:  \{\cf2 \strokec2 out_csv\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 f"Report: \{\cf2 \strokec2 out_report\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  report[\cf7 \strokec7 "warnings"\cf2 \strokec2 ]:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf10 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 "\cf8 \strokec8 \\n\cf7 \strokec7 WARNINGS:"\cf2 \strokec2 )\cb1 \
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  w \cf3 \strokec3 in\cf2 \strokec2  report[\cf7 \strokec7 "warnings"\cf2 \strokec2 ]:\cb1 \
+\cb4         \cf10 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 "-"\cf2 \strokec2 , w)\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  os\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 os.environ[\cf7 \strokec7 "TRANSFORMERS_NO_TF"\cf2 \strokec2 ] \strokec6 =\strokec2  \cf7 \strokec7 "1"\cf2 \cb1 \strokec2 \
+\cb4 os.environ[\cf7 \strokec7 "TF_CPP_MIN_LOG_LEVEL"\cf2 \strokec2 ] \strokec6 =\strokec2  \cf7 \strokec7 "3"\cf2 \cb1 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # Imports\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  re\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  json\cb1 \
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  pathlib \cf3 \strokec3 import\cf2 \strokec2  Path\cb1 \
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  math \cf3 \strokec3 import\cf2 \strokec2  factorial\cb1 \
+\
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  numpy \cf3 \strokec3 as\cf2 \strokec2  np\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  pandas \cf3 \strokec3 as\cf2 \strokec2  pd\cb1 \
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  sklearn.preprocessing \cf3 \strokec3 import\cf2 \strokec2  MinMaxScaler\cb1 \
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  sentence_transformers \cf3 \strokec3 import\cf2 \strokec2  SentenceTransformer\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 BASE_DIR \strokec6 =\strokec2  Path(\cf7 \strokec7 ""\cf2 \strokec2 )\cb1 \
+\cb4 INPUT_PARQUET \strokec6 =\strokec2  BASE_DIR \strokec6 /\strokec2  \cf7 \strokec7 "cleaned_dataset.parquet"\cf2 \cb1 \strokec2 \
+\
+\cb4 OUT_DIR \strokec6 =\strokec2  BASE_DIR \strokec6 /\strokec2  \cf7 \strokec7 "outputs_methodology"\cf2 \cb1 \strokec2 \
+\cb4 OUT_DIR.mkdir(\cf11 \strokec11 parents\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 , \cf11 \strokec11 exist_ok\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 )\cb1 \
+\
+\cb4 EMBED_MODEL_NAME \strokec6 =\strokec2  \cf7 \strokec7 "sentence-transformers/all-MiniLM-L6-v2"\cf2 \cb1 \strokec2 \
+\cb4 BATCH_SIZE \strokec6 =\strokec2  \cf13 \strokec13 64\cf2 \cb1 \strokec2 \
+\cb4 RANDOM_SEED \strokec6 =\strokec2  \cf13 \strokec13 42\cf2 \cb1 \strokec2 \
+\cb4 np.random.seed(RANDOM_SEED)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Columns used to build the corpus (only non-missing values)\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 CORPUS_COLS \strokec6 =\strokec2  [\cb1 \
+\cb4     \cf7 \strokec7 "Drivers"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Objectives"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Innovative Aspects"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Key Technical Skills"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Analytical Skills"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Soft / Professional Skills"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Career Pathways"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Industrial Linkage Evidence"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Interdisciplinary Linkages"\cf2 \strokec2 ,\cb1 \
+\cb4 ]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Semantic axes with seed phrases\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 AXES \strokec6 =\strokec2  \{\cb1 \
+\cb4     \cf7 \strokec7 "AI"\cf2 \strokec2 : [\cb1 \
+\cb4         \cf7 \strokec7 "machine learning"\cf2 \strokec2 , \cf7 \strokec7 "deep learning"\cf2 \strokec2 , \cf7 \strokec7 "neural networks"\cf2 \strokec2 , \cf7 \strokec7 "foundation models"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "large language models"\cf2 \strokec2 , \cf7 \strokec7 "natural language processing"\cf2 \strokec2 , \cf7 \strokec7 "computer vision"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "data mining"\cf2 \strokec2 , \cf7 \strokec7 "predictive analytics"\cf2 \strokec2 , \cf7 \strokec7 "reinforcement learning"\cf2 \strokec2 , \cf7 \strokec7 "MLOps"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "generative AI"\cf2 \strokec2 , \cf7 \strokec7 "AI ethics"\cf2 \strokec2 , \cf7 \strokec7 "explainable AI"\cf2 \strokec2 , \cf7 \strokec7 "knowledge graphs"\cf2 \cb1 \strokec2 \
+\cb4     ],\cb1 \
+\cb4     \cf7 \strokec7 "SUS"\cf2 \strokec2 : [\cb1 \
+\cb4         \cf7 \strokec7 "sustainability"\cf2 \strokec2 , \cf7 \strokec7 "climate change"\cf2 \strokec2 , \cf7 \strokec7 "net zero"\cf2 \strokec2 , \cf7 \strokec7 "decarbonization"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "renewable energy"\cf2 \strokec2 , \cf7 \strokec7 "carbon management"\cf2 \strokec2 , \cf7 \strokec7 "circular economy"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "environmental resilience"\cf2 \strokec2 , \cf7 \strokec7 "ESG"\cf2 \strokec2 , \cf7 \strokec7 "green technologies"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "climate adaptation"\cf2 \strokec2 , \cf7 \strokec7 "biodiversity"\cf2 \strokec2 , \cf7 \strokec7 "clean energy transition"\cf2 \cb1 \strokec2 \
+\cb4     ],\cb1 \
+\cb4     \cf7 \strokec7 "HEALTH"\cf2 \strokec2 : [\cb1 \
+\cb4         \cf7 \strokec7 "digital health"\cf2 \strokec2 , \cf7 \strokec7 "biomedical engineering"\cf2 \strokec2 , \cf7 \strokec7 "clinical AI"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "health informatics"\cf2 \strokec2 , \cf7 \strokec7 "medical data"\cf2 \strokec2 , \cf7 \strokec7 "public health"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "telemedicine"\cf2 \strokec2 , \cf7 \strokec7 "precision medicine"\cf2 \strokec2 , \cf7 \strokec7 "wearables"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "patient monitoring"\cf2 \strokec2 , \cf7 \strokec7 "bioinformatics"\cf2 \strokec2 , \cf7 \strokec7 "computational biology"\cf2 \cb1 \strokec2 \
+\cb4     ],\cb1 \
+\cb4     \cf7 \strokec7 "CYBER"\cf2 \strokec2 : [\cb1 \
+\cb4         \cf7 \strokec7 "cybersecurity"\cf2 \strokec2 , \cf7 \strokec7 "information security"\cf2 \strokec2 , \cf7 \strokec7 "privacy"\cf2 \strokec2 , \cf7 \strokec7 "data governance"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "AI governance"\cf2 \strokec2 , \cf7 \strokec7 "regulation"\cf2 \strokec2 , \cf7 \strokec7 "policy"\cf2 \strokec2 , \cf7 \strokec7 "risk management"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "trustworthy AI"\cf2 \strokec2 , \cf7 \strokec7 "responsible AI"\cf2 \strokec2 , \cf7 \strokec7 "ethics"\cf2 \strokec2 , \cf7 \strokec7 "compliance"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "law and technology"\cf2 \cb1 \strokec2 \
+\cb4     ],\cb1 \
+\cb4     \cf7 \strokec7 "INDUSTRY"\cf2 \strokec2 : [\cb1 \
+\cb4         \cf7 \strokec7 "industry partnership"\cf2 \strokec2 , \cf7 \strokec7 "industrial collaboration"\cf2 \strokec2 , \cf7 \strokec7 "internship"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "capstone project"\cf2 \strokec2 , \cf7 \strokec7 "industry-led"\cf2 \strokec2 , \cf7 \strokec7 "professional practice"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "employability"\cf2 \strokec2 , \cf7 \strokec7 "work-integrated learning"\cf2 \strokec2 , \cf7 \strokec7 "technology transfer"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf7 \strokec7 "startup"\cf2 \strokec2 , \cf7 \strokec7 "entrepreneurship"\cf2 \strokec2 , \cf7 \strokec7 "innovation ecosystem"\cf2 \cb1 \strokec2 \
+\cb4     ],\cb1 \
+\cb4 \}\cb1 \
+\
+\cb4 DRIVER_SPLIT_REGEX \strokec6 =\strokec2  re.compile(\cb1 \
+\cb4     \cf7 \strokec7 r\cf9 \strokec9 "\cf14 \strokec14 (?:\cf9 \strokec9 ;\cf2 \strokec6 |\cf8 \strokec8 \\|\cf2 \strokec6 |\cf9 \strokec9 /\cf2 \strokec6 |\cf9 \strokec9 ,\cf2 \strokec6 |\cf9 \strokec9 \\band\\b\cf2 \strokec6 |\cf9 \strokec9 \\bor\\b\cf2 \strokec6 |\cf8 \strokec8 \\n\cf2 \strokec6 |\cf8 \strokec8 \\r\cf14 \strokec14 )\cf2 \strokec6 +\cf9 \strokec9 "\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 flags\cf2 \strokec6 =\strokec2 re.IGNORECASE\cb1 \
+\cb4 )\cb1 \
+\
+\cb4 TOPK_DRIVERS_PER_AXIS \strokec6 =\strokec2  \cf13 \strokec13 5\cf2 \cb1 \strokec2 \
+\cb4 TOPK_COUNTRY_DRIVERS \strokec6 =\strokec2  \cf13 \strokec13 15\cf2 \cb1 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 1) HELPERS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 is_missing\cf2 \strokec2 (\cf11 \strokec11 x\cf2 \strokec2 ) -> \cf12 \strokec12 bool\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 return\cf2 \strokec2  x \cf7 \strokec7 is\cf2 \strokec2  \cf7 \strokec7 None\cf2 \strokec2  \cf7 \strokec7 or\cf2 \strokec2  (\cf10 \strokec10 isinstance\cf2 \strokec2 (x, \cf12 \strokec12 float\cf2 \strokec2 ) \cf7 \strokec7 and\cf2 \strokec2  np.isnan(x))\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 safe_join_text\cf2 \strokec2 (\cf11 \strokec11 row\cf2 \strokec2 : pd.Series, \cf11 \strokec11 cols\cf2 \strokec2 : \cf12 \strokec12 list\cf2 \strokec2 [\cf12 \strokec12 str\cf2 \strokec2 ]) -> \cf12 \strokec12 str\cf2 \strokec2  \strokec6 |\strokec2  \cf12 \strokec12 None\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     parts \strokec6 =\strokec2  []\cb1 \
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  cols:\cb1 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  c \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  row.index:\cb1 \
+\cb4             \cf3 \strokec3 continue\cf2 \cb1 \strokec2 \
+\cb4         v \strokec6 =\strokec2  row[c]\cb1 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  \cf10 \strokec10 isinstance\cf2 \strokec2 (v, \cf12 \strokec12 str\cf2 \strokec2 ) \cf7 \strokec7 and\cf2 \strokec2  v.strip():\cb1 \
+\cb4             parts.append(\cf7 \strokec7 f"\{\cf2 \strokec2 c\cf7 \strokec7 \}: \{\cf2 \strokec2 v.strip()\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\cb4         \cf3 \strokec3 elif\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  is_missing(v):\cb1 \
+\cb4             parts.append(\cf7 \strokec7 f"\{\cf2 \strokec2 c\cf7 \strokec7 \}: \{\cf12 \strokec12 str\cf2 \strokec2 (v).strip()\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  \cf7 \strokec7 " | "\cf2 \strokec2 .join(parts) \cf3 \strokec3 if\cf2 \strokec2  parts \cf3 \strokec3 else\cf2 \strokec2  \cf7 \strokec7 None\cf2 \cb1 \strokec2 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 cosine_sim_matrix\cf2 \strokec2 (\cf11 \strokec11 A\cf2 \strokec2 : np.ndarray, \cf11 \strokec11 b\cf2 \strokec2 : np.ndarray) -> np.ndarray:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     A_norm \strokec6 =\strokec2  A \strokec6 /\strokec2  (np.linalg.norm(A, \cf11 \strokec11 axis\cf2 \strokec6 =\cf13 \strokec13 1\cf2 \strokec2 , \cf11 \strokec11 keepdims\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ) \strokec6 +\strokec2  \cf13 \strokec13 1e-12\cf2 \strokec2 )\cb1 \
+\cb4     b_norm \strokec6 =\strokec2  b \strokec6 /\strokec2  (np.linalg.norm(b) \strokec6 +\strokec2  \cf13 \strokec13 1e-12\cf2 \strokec2 )\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  A_norm \strokec6 @\strokec2  b_norm\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 minmax_scale_preserve_nan\cf2 \strokec2 (\cf11 \strokec11 x\cf2 \strokec2 : np.ndarray) -> np.ndarray:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     out \strokec6 =\strokec2  np.full_like(x, np.nan, \cf11 \strokec11 dtype\cf2 \strokec6 =\cf12 \strokec12 float\cf2 \strokec2 )\cb1 \
+\cb4     mask \strokec6 =\strokec2  np.isfinite(x)\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  mask.any():\cb1 \
+\cb4         out[mask] \strokec6 =\strokec2  MinMaxScaler().fit_transform(x[mask].reshape(\strokec6 -\cf13 \strokec13 1\cf2 \strokec2 , \cf13 \strokec13 1\cf2 \strokec2 )).ravel()\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  out\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 coalition_value\cf2 \strokec2 (\cf11 \strokec11 scores\cf2 \strokec2 : np.ndarray) -> \cf12 \strokec12 float\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  scores.size \strokec6 ==\strokec2  \cf13 \strokec13 0\cf2 \strokec2 :\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  \cf13 \strokec13 0.0\cf2 \cb1 \strokec2 \
+\cb4     scores \strokec6 =\strokec2  np.clip(scores.astype(\cf12 \strokec12 float\cf2 \strokec2 ), \cf13 \strokec13 0.0\cf2 \strokec2 , \cf13 \strokec13 1.0\cf2 \strokec2 )\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  \cf12 \strokec12 float\cf2 \strokec2 (\cf13 \strokec13 1.0\cf2 \strokec2  \strokec6 -\strokec2  np.prod(\cf13 \strokec13 1.0\cf2 \strokec2  \strokec6 -\strokec2  scores))\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 shapley_values\cf2 \strokec2 (\cf11 \strokec11 axis_scores\cf2 \strokec2 : \cf12 \strokec12 dict\cf2 \strokec2 [\cf12 \strokec12 str\cf2 \strokec2 , \cf12 \strokec12 float\cf2 \strokec2 ]) -> \cf12 \strokec12 dict\cf2 \strokec2 [\cf12 \strokec12 str\cf2 \strokec2 , \cf12 \strokec12 float\cf2 \strokec2 ]:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     axes \strokec6 =\strokec2  \cf12 \strokec12 list\cf2 \strokec2 (axis_scores.keys())\cb1 \
+\cb4     n \strokec6 =\strokec2  \cf10 \strokec10 len\cf2 \strokec2 (axes)\cb1 \
+\
+\cb4     s \strokec6 =\strokec2  np.array([\cb1 \
+\cb4         \cf13 \strokec13 0.0\cf2 \strokec2  \cf3 \strokec3 if\cf2 \strokec2  is_missing(v) \cf3 \strokec3 else\cf2 \strokec2  \cf12 \strokec12 float\cf2 \strokec2 (v)\cb1 \
+\cb4         \cf3 \strokec3 for\cf2 \strokec2  v \cf3 \strokec3 in\cf2 \strokec2  axis_scores.values()\cb1 \
+\cb4     ])\cb1 \
+\
+\cb4     v \strokec6 =\strokec2  \{\}\cb1 \
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  mask \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 range\cf2 \strokec2 (\cf13 \strokec13 1\cf2 \strokec2  \strokec6 <<\strokec2  n):\cb1 \
+\cb4         subset \strokec6 =\strokec2  [s[i] \cf3 \strokec3 for\cf2 \strokec2  i \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 range\cf2 \strokec2 (n) \cf3 \strokec3 if\cf2 \strokec2  mask \strokec6 &\strokec2  (\cf13 \strokec13 1\cf2 \strokec2  \strokec6 <<\strokec2  i)]\cb1 \
+\cb4         v[mask] \strokec6 =\strokec2  coalition_value(np.array(subset))\cb1 \
+\
+\cb4     shap \strokec6 =\strokec2  np.zeros(n)\cb1 \
+\cb4     n_fact \strokec6 =\strokec2  factorial(n)\cb1 \
+\
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  i \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 range\cf2 \strokec2 (n):\cb1 \
+\cb4         \cf3 \strokec3 for\cf2 \strokec2  mask \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 range\cf2 \strokec2 (\cf13 \strokec13 1\cf2 \strokec2  \strokec6 <<\strokec2  n):\cb1 \
+\cb4             \cf3 \strokec3 if\cf2 \strokec2  mask \strokec6 &\strokec2  (\cf13 \strokec13 1\cf2 \strokec2  \strokec6 <<\strokec2  i):\cb1 \
+\cb4                 \cf3 \strokec3 continue\cf2 \cb1 \strokec2 \
+\cb4             k \strokec6 =\strokec2  \cf10 \strokec10 bin\cf2 \strokec2 (mask).count(\cf7 \strokec7 "1"\cf2 \strokec2 )\cb1 \
+\cb4             weight \strokec6 =\strokec2  factorial(k) \strokec6 *\strokec2  factorial(n \strokec6 -\strokec2  k \strokec6 -\strokec2  \cf13 \strokec13 1\cf2 \strokec2 ) \strokec6 /\strokec2  n_fact\cb1 \
+\cb4             shap[i] \strokec6 +=\strokec2  weight \strokec6 *\strokec2  (v[mask \strokec6 |\strokec2  (\cf13 \strokec13 1\cf2 \strokec2  \strokec6 <<\strokec2  i)] \strokec6 -\strokec2  v[mask])\cb1 \
+\
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  \{axes[i]: \cf12 \strokec12 float\cf2 \strokec2 (shap[i]) \cf3 \strokec3 for\cf2 \strokec2  i \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 range\cf2 \strokec2 (n)\}\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 parse_driver_phrases\cf2 \strokec2 (\cf11 \strokec11 text\cf2 \strokec2 ) -> \cf12 \strokec12 list\cf2 \strokec2 [\cf12 \strokec12 str\cf2 \strokec2 ]:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  is_missing(text):\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  []\cb1 \
+\cb4     chunks \strokec6 =\strokec2  [c.strip() \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  DRIVER_SPLIT_REGEX.split(\cf12 \strokec12 str\cf2 \strokec2 (text)) \cf3 \strokec3 if\cf2 \strokec2  c.strip()]\cb1 \
+\cb4     seen, out \strokec6 =\strokec2  \cf12 \strokec12 set\cf2 \strokec2 (), []\cb1 \
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  chunks:\cb1 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  c.lower() \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  seen:\cb1 \
+\cb4             seen.add(c.lower())\cb1 \
+\cb4             out.append(c)\cb1 \
+\cb4     \cf3 \strokec3 return\cf2 \strokec2  out\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 2) LOAD\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df \strokec6 =\strokec2  pd.read_parquet(INPUT_PARQUET)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 3) STEP 1: TEXT_CORPUS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df[\cf7 \strokec7 "TEXT_CORPUS"\cf2 \strokec2 ] \strokec6 =\strokec2  df.apply(\cf7 \strokec7 lambda\cf2 \strokec2  \cf11 \strokec11 r\cf2 \strokec2 : safe_join_text(r, CORPUS_COLS), \cf11 \strokec11 axis\cf2 \strokec6 =\cf13 \strokec13 1\cf2 \strokec2 )\cb1 \
+\cb4 mask_corpus \strokec6 =\strokec2  df[\cf7 \strokec7 "TEXT_CORPUS"\cf2 \strokec2 ].notna()\cb1 \
+\cb4 df_corpus \strokec6 =\strokec2  df.loc[mask_corpus].copy()\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 4) STEP 2: PROGRAM EMBEDDINGS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 model \strokec6 =\strokec2  SentenceTransformer(EMBED_MODEL_NAME)\cb1 \
+\
+\cb4 emb_program \strokec6 =\strokec2  model.encode(\cb1 \
+\cb4     df_corpus[\cf7 \strokec7 "TEXT_CORPUS"\cf2 \strokec2 ].tolist(),\cb1 \
+\cb4     \cf11 \strokec11 batch_size\cf2 \strokec6 =\strokec2 BATCH_SIZE,\cb1 \
+\cb4     \cf11 \strokec11 show_progress_bar\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 convert_to_numpy\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 5) STEP 3: SEEDED AXES\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 axis_vectors \strokec6 =\strokec2  \{\}\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  axis, seeds \cf3 \strokec3 in\cf2 \strokec2  AXES.items():\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     axis_vectors[axis] \strokec6 =\strokec2  model.encode(seeds, \cf11 \strokec11 convert_to_numpy\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ).mean(\cf11 \strokec11 axis\cf2 \strokec6 =\cf13 \strokec13 0\cf2 \strokec2 )\cb1 \
+\
+\cb4 axis_scores \strokec6 =\strokec2  \{\}\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  axis, vec \cf3 \strokec3 in\cf2 \strokec2  axis_vectors.items():\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     sims \strokec6 =\strokec2  cosine_sim_matrix(emb_program, vec)\cb1 \
+\cb4     axis_scores[axis] \strokec6 =\strokec2  minmax_scale_preserve_nan(sims)\cb1 \
+\cb4     df_corpus[\cf7 \strokec7 f"score_\{\cf2 \strokec2 axis\cf7 \strokec7 \}"\cf2 \strokec2 ] \strokec6 =\strokec2  axis_scores[axis]\cb1 \
+\
+\cb4 df_scores \strokec6 =\strokec2  df.copy()\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  axis \cf3 \strokec3 in\cf2 \strokec2  AXES:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     df_scores[\cf7 \strokec7 f"score_\{\cf2 \strokec2 axis\cf7 \strokec7 \}"\cf2 \strokec2 ] \strokec6 =\strokec2  np.nan\cb1 \
+\cb4     df_scores.loc[df_corpus.index, \cf7 \strokec7 f"score_\{\cf2 \strokec2 axis\cf7 \strokec7 \}"\cf2 \strokec2 ] \strokec6 =\strokec2  df_corpus[\cf7 \strokec7 f"score_\{\cf2 \strokec2 axis\cf7 \strokec7 \}"\cf2 \strokec2 ]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 6) STEP 4: GAME THEORY\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 axis_names \strokec6 =\strokec2  \cf12 \strokec12 list\cf2 \strokec2 (AXES.keys())\cb1 \
+\cb4 emergence \strokec6 =\strokec2  []\cb1 \
+\cb4 shapley_all \strokec6 =\strokec2  \{a: [] \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  axis_names\}\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  _, row \cf3 \strokec3 in\cf2 \strokec2  df_scores.iterrows():\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     scores \strokec6 =\strokec2  \{a: row.get(\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2 , np.nan) \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  axis_names\}\cb1 \
+\cb4     s \strokec6 =\strokec2  np.array([\cf13 \strokec13 0.0\cf2 \strokec2  \cf3 \strokec3 if\cf2 \strokec2  is_missing(v) \cf3 \strokec3 else\cf2 \strokec2  v \cf3 \strokec3 for\cf2 \strokec2  v \cf3 \strokec3 in\cf2 \strokec2  scores.values()])\cb1 \
+\cb4     emergence.append(coalition_value(s))\cb1 \
+\
+\cb4     shap \strokec6 =\strokec2  shapley_values(scores)\cb1 \
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  axis_names:\cb1 \
+\cb4         shapley_all[a].append(shap[a])\cb1 \
+\
+\cb4 df_scores[\cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 ] \strokec6 =\strokec2  emergence\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  axis_names:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     df_scores[\cf7 \strokec7 f"Shapley_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2 ] \strokec6 =\strokec2  shapley_all[a]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 7) STEP 5: DRIVER ATTRIBUTION\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 driver_rows \strokec6 =\strokec2  []\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  idx, row \cf3 \strokec3 in\cf2 \strokec2  df_scores.iterrows():\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     phrases \strokec6 =\strokec2  parse_driver_phrases(row.get(\cf7 \strokec7 "Drivers"\cf2 \strokec2 ))\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  phrases:\cb1 \
+\cb4         \cf3 \strokec3 continue\cf2 \cb1 \strokec2 \
+\
+\cb4     emb_d \strokec6 =\strokec2  model.encode(phrases, \cf11 \strokec11 convert_to_numpy\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 )\cb1 \
+\
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  axis, vec \cf3 \strokec3 in\cf2 \strokec2  axis_vectors.items():\cb1 \
+\cb4         sims \strokec6 =\strokec2  cosine_sim_matrix(emb_d, vec)\cb1 \
+\cb4         \cf3 \strokec3 for\cf2 \strokec2  rank, j \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 enumerate\cf2 \strokec2 (np.argsort(\strokec6 -\strokec2 sims)[:TOPK_DRIVERS_PER_AXIS], \cf13 \strokec13 1\cf2 \strokec2 ):\cb1 \
+\cb4             driver_rows.append(\{\cb1 \
+\cb4                 \cf7 \strokec7 "row_index"\cf2 \strokec2 : idx,\cb1 \
+\cb4                 \cf7 \strokec7 "Country"\cf2 \strokec2 : row.get(\cf7 \strokec7 "Country"\cf2 \strokec2 ),\cb1 \
+\cb4                 \cf7 \strokec7 "University"\cf2 \strokec2 : row.get(\cf7 \strokec7 "University"\cf2 \strokec2 ),\cb1 \
+\cb4                 \cf7 \strokec7 "Program"\cf2 \strokec2 : row.get(\cf7 \strokec7 "Program"\cf2 \strokec2 ),\cb1 \
+\cb4                 \cf7 \strokec7 "Axis"\cf2 \strokec2 : axis,\cb1 \
+\cb4                 \cf7 \strokec7 "DriverPhrase"\cf2 \strokec2 : phrases[j],\cb1 \
+\cb4                 \cf7 \strokec7 "DriverSimRaw"\cf2 \strokec2 : \cf12 \strokec12 float\cf2 \strokec2 (sims[j]),\cb1 \
+\cb4                 \cf7 \strokec7 "TopRank"\cf2 \strokec2 : rank,\cb1 \
+\cb4             \})\cb1 \
+\
+\cb4 df_driver \strokec6 =\strokec2  pd.DataFrame(driver_rows)\cb1 \
+\
+\cb4 df_country \strokec6 =\strokec2  (\cb1 \
+\cb4     df_driver\cb1 \
+\cb4     .groupby([\cf7 \strokec7 "Country"\cf2 \strokec2 , \cf7 \strokec7 "Axis"\cf2 \strokec2 , \cf7 \strokec7 "DriverPhrase"\cf2 \strokec2 ])\cb1 \
+\cb4     .agg(\cf11 \strokec11 mean_sim\cf2 \strokec6 =\strokec2 (\cf7 \strokec7 "DriverSimRaw"\cf2 \strokec2 , \cf7 \strokec7 "mean"\cf2 \strokec2 ), \cf11 \strokec11 count\cf2 \strokec6 =\strokec2 (\cf7 \strokec7 "DriverSimRaw"\cf2 \strokec2 , \cf7 \strokec7 "count"\cf2 \strokec2 ))\cb1 \
+\cb4     .reset_index()\cb1 \
+\cb4     .sort_values([\cf7 \strokec7 "Country"\cf2 \strokec2 , \cf7 \strokec7 "Axis"\cf2 \strokec2 , \cf7 \strokec7 "mean_sim"\cf2 \strokec2 , \cf7 \strokec7 "count"\cf2 \strokec2 ], \cf11 \strokec11 ascending\cf2 \strokec6 =\strokec2 [\cf7 \strokec7 True\cf2 \strokec2 , \cf7 \strokec7 True\cf2 \strokec2 , \cf7 \strokec7 False\cf2 \strokec2 , \cf7 \strokec7 False\cf2 \strokec2 ])\cb1 \
+\cb4 )\cb1 \
+\
+\cb4 df_country[\cf7 \strokec7 "rank"\cf2 \strokec2 ] \strokec6 =\strokec2  df_country.groupby([\cf7 \strokec7 "Country"\cf2 \strokec2 , \cf7 \strokec7 "Axis"\cf2 \strokec2 ]).cumcount() \strokec6 +\strokec2  \cf13 \strokec13 1\cf2 \cb1 \strokec2 \
+\cb4 df_country \strokec6 =\strokec2  df_country[df_country[\cf7 \strokec7 "rank"\cf2 \strokec2 ] \strokec6 <=\strokec2  TOPK_COUNTRY_DRIVERS]\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 8) SAVE OUTPUTS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df_scores.to_parquet(OUT_DIR \strokec6 /\strokec2  \cf7 \strokec7 "methodology_program_scores.parquet"\cf2 \strokec2 , \cf11 \strokec11 index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\cb4 df_scores.to_excel(OUT_DIR \strokec6 /\strokec2  \cf7 \strokec7 "methodology_program_scores.xlsx"\cf2 \strokec2 , \cf11 \strokec11 index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\cb4 df_driver.to_excel(OUT_DIR \strokec6 /\strokec2  \cf7 \strokec7 "driver_attribution_top_per_program.xlsx"\cf2 \strokec2 , \cf11 \strokec11 index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\cb4 df_country.to_excel(OUT_DIR \strokec6 /\strokec2  \cf7 \strokec7 "driver_attribution_country_summary.xlsx"\cf2 \strokec2 , \cf11 \strokec11 index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 with\cf2 \strokec2  \cf10 \strokec10 open\cf2 \strokec2 (OUT_DIR \strokec6 /\strokec2  \cf7 \strokec7 "methodology_run_report.json"\cf2 \strokec2 , \cf7 \strokec7 "w"\cf2 \strokec2 , \cf11 \strokec11 encoding\cf2 \strokec6 =\cf7 \strokec7 "utf-8"\cf2 \strokec2 ) \cf3 \strokec3 as\cf2 \strokec2  f:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     json.dump(\{\cb1 \
+\cb4         \cf7 \strokec7 "rows_total"\cf2 \strokec2 : \cf12 \strokec12 int\cf2 \strokec2 (df_scores.shape[\cf13 \strokec13 0\cf2 \strokec2 ]),\cb1 \
+\cb4         \cf7 \strokec7 "rows_with_text_corpus"\cf2 \strokec2 : \cf12 \strokec12 int\cf2 \strokec2 (mask_corpus.sum()),\cb1 \
+\cb4         \cf7 \strokec7 "embedding_model"\cf2 \strokec2 : EMBED_MODEL_NAME,\cb1 \
+\cb4         \cf7 \strokec7 "axes"\cf2 \strokec2 : axis_names\cb1 \
+\cb4     \}, f, \cf11 \strokec11 indent\cf2 \strokec6 =\cf13 \strokec13 2\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 "DONE (methodology only)."\cf2 \strokec2 )\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # IMPORTS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  numpy \cf3 \strokec3 as\cf2 \strokec2  np\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  pandas \cf3 \strokec3 as\cf2 \strokec2  pd\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  matplotlib.pyplot \cf3 \strokec3 as\cf2 \strokec2  plt\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  seaborn \cf3 \strokec3 as\cf2 \strokec2  sns\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  networkx \cf3 \strokec3 as\cf2 \strokec2  nx\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  geopandas \cf3 \strokec3 as\cf2 \strokec2  gpd\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  pycountry\cb1 \
+\
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  pathlib \cf3 \strokec3 import\cf2 \strokec2  Path\cb1 \
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  itertools \cf3 \strokec3 import\cf2 \strokec2  combinations\cb1 \
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  matplotlib.patches \cf3 \strokec3 import\cf2 \strokec2  Polygon\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # CONFIG\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 BASE_DIR \strokec6 =\strokec2  Path(\cf7 \strokec7 r\cf9 \strokec9 ""\cf2 \strokec2 )\cb1 \
+\
+\cb4 DATA_PATH \strokec6 =\strokec2  BASE_DIR \strokec6 /\strokec2  \cf7 \strokec7 "outputs_methodology"\cf2 \strokec2  \strokec6 /\strokec2  \cf7 \strokec7 "methodology_program_scores.parquet"\cf2 \cb1 \strokec2 \
+\cb4 WORLD_SHP \strokec6 =\strokec2  BASE_DIR \strokec6 /\strokec2  \cf7 \strokec7 "world_map"\cf2 \strokec2  \strokec6 /\strokec2  \cf7 \strokec7 "ne_110m_admin_0_countries.shp"\cf2 \cb1 \strokec2 \
+\
+\cb4 FIG_DIR \strokec6 =\strokec2  BASE_DIR \strokec6 /\strokec2  \cf7 \strokec7 "figures_q1"\cf2 \cb1 \strokec2 \
+\cb4 FIG_DIR.mkdir(\cf11 \strokec11 exist_ok\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 , \cf11 \strokec11 parents\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 )\cb1 \
+\
+\cb4 DPI \strokec6 =\strokec2  \cf13 \strokec13 300\cf2 \cb1 \strokec2 \
+\
+\cb4 AXES \strokec6 =\strokec2  [\cf7 \strokec7 "AI"\cf2 \strokec2 , \cf7 \strokec7 "SUS"\cf2 \strokec2 , \cf7 \strokec7 "HEALTH"\cf2 \strokec2 , \cf7 \strokec7 "CYBER"\cf2 \strokec2 , \cf7 \strokec7 "INDUSTRY"\cf2 \strokec2 ]\cb1 \
+\cb4 YEAR_COL \strokec6 =\strokec2  \cf7 \strokec7 "Launch Year / Period"\cf2 \cb1 \strokec2 \
+\
+\cb4 AXIS_COLORS \strokec6 =\strokec2  \{\cb1 \
+\cb4     \cf7 \strokec7 "AI"\cf2 \strokec2 : \cf7 \strokec7 "#d62728"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "SUS"\cf2 \strokec2 : \cf7 \strokec7 "#2ca02c"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "HEALTH"\cf2 \strokec2 : \cf7 \strokec7 "#1f77b4"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "CYBER"\cf2 \strokec2 : \cf7 \strokec7 "#9467bd"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "INDUSTRY"\cf2 \strokec2 : \cf7 \strokec7 "#ff7f0e"\cf2 \strokec2 ,\cb1 \
+\cb4 \}\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # BASIC VALIDATION\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  DATA_PATH.exists():\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 raise\cf2 \strokec2  \cf12 \strokec12 FileNotFoundError\cf2 \strokec2 (\cf7 \strokec7 f"Parquet not found: \{\cf2 \strokec2 DATA_PATH\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  WORLD_SHP.exists():\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 raise\cf2 \strokec2  \cf12 \strokec12 FileNotFoundError\cf2 \strokec2 (\cf7 \strokec7 f"Shapefile not found: \{\cf2 \strokec2 WORLD_SHP\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # LOAD DATA\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df \strokec6 =\strokec2  pd.read_parquet(DATA_PATH)\cb1 \
+\cb4 df_eval \strokec6 =\strokec2  df.copy()\cb1 \
+\
+\cb4 required_cols \strokec6 =\strokec2  [\cf7 \strokec7 "Program"\cf2 \strokec2 , \cf7 \strokec7 "Country"\cf2 \strokec2 , \cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 , YEAR_COL] \strokec6 +\strokec2  [\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2  \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES]\cb1 \
+\cb4 missing \strokec6 =\strokec2  [c \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  required_cols \cf3 \strokec3 if\cf2 \strokec2  c \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  df_eval.columns]\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  missing:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 raise\cf2 \strokec2  \cf12 \strokec12 ValueError\cf2 \strokec2 (\cf7 \strokec7 f"Missing required columns in parquet: \{\cf2 \strokec2 missing\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # COUNTRY \uc0\u8594  ISO3 HELPERS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 ISO3_OVERRIDES \strokec6 =\strokec2  \{\cb1 \
+\cb4     \cf7 \strokec7 "United States"\cf2 \strokec2 : \cf7 \strokec7 "USA"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "United States of America"\cf2 \strokec2 : \cf7 \strokec7 "USA"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "UK"\cf2 \strokec2 : \cf7 \strokec7 "GBR"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "United Kingdom"\cf2 \strokec2 : \cf7 \strokec7 "GBR"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Russia"\cf2 \strokec2 : \cf7 \strokec7 "RUS"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Iran"\cf2 \strokec2 : \cf7 \strokec7 "IRN"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "South Korea"\cf2 \strokec2 : \cf7 \strokec7 "KOR"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "North Korea"\cf2 \strokec2 : \cf7 \strokec7 "PRK"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Vietnam"\cf2 \strokec2 : \cf7 \strokec7 "VNM"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Czech Republic"\cf2 \strokec2 : \cf7 \strokec7 "CZE"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Czechia"\cf2 \strokec2 : \cf7 \strokec7 "CZE"\cf2 \strokec2 ,\cb1 \
+\cb4 \}\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb4 \strokec7 def\cf2 \strokec2  \cf10 \strokec10 country_to_iso3\cf2 \strokec2 (\cf11 \strokec11 name\cf2 \strokec2 ):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  pd.isna(name):\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  \cf7 \strokec7 None\cf2 \cb1 \strokec2 \
+\cb4     s \strokec6 =\strokec2  \cf12 \strokec12 str\cf2 \strokec2 (name).strip()\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  s:\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  \cf7 \strokec7 None\cf2 \cb1 \strokec2 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  s \cf7 \strokec7 in\cf2 \strokec2  ISO3_OVERRIDES:\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  ISO3_OVERRIDES[s]\cb1 \
+\cb4     \cf3 \strokec3 try\cf2 \strokec2 :\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  pycountry.countries.lookup(s).alpha_3\cb1 \
+\cb4     \cf3 \strokec3 except\cf2 \strokec2  \cf12 \strokec12 Exception\cf2 \strokec2 :\cb1 \
+\cb4         \cf3 \strokec3 return\cf2 \strokec2  \cf7 \strokec7 None\cf2 \cb1 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 1) NLP EVALUATION \'97 AXIS SEPARABILITY\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 axis_scores \strokec6 =\strokec2  df_eval[[\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2  \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES]].dropna(\cf11 \strokec11 how\cf2 \strokec6 =\cf7 \strokec7 "all"\cf2 \strokec2 )\cb1 \
+\cb4 axis_corr \strokec6 =\strokec2  axis_scores.corr()\cb1 \
+\
+\cb4 plt.figure(\cf11 \strokec11 figsize\cf2 \strokec6 =\strokec2 (\cf13 \strokec13 7\cf2 \strokec2 , \cf13 \strokec13 6\cf2 \strokec2 ))\cb1 \
+\cb4 sns.heatmap(axis_corr, \cf11 \strokec11 annot\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 , \cf11 \strokec11 fmt\cf2 \strokec6 =\cf7 \strokec7 ".2f"\cf2 \strokec2 , \cf11 \strokec11 cmap\cf2 \strokec6 =\cf7 \strokec7 "coolwarm"\cf2 \strokec2 , \cf11 \strokec11 center\cf2 \strokec6 =\cf13 \strokec13 0\cf2 \strokec2 )\cb1 \
+\cb4 plt.title(\cf7 \strokec7 "Axis Separability (Correlation of Axis Scores)"\cf2 \strokec2 )\cb1 \
+\cb4 plt.tight_layout()\cb1 \
+\cb4 plt.savefig(FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "axis_separability_heatmap.png"\cf2 \strokec2 , \cf11 \strokec11 dpi\cf2 \strokec6 =\strokec2 DPI, \cf11 \strokec11 bbox_inches\cf2 \strokec6 =\cf7 \strokec7 "tight"\cf2 \strokec2 )\cb1 \
+\cb4 plt.close()\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 2) GAME THEORY EVALUATION\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # (Keep if Shapley_* exists; otherwise skip safely)\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 shapley_cols \strokec6 =\strokec2  [\cf7 \strokec7 f"Shapley_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2  \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES]\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  \cf10 \strokec10 all\cf2 \strokec2 (c \cf3 \strokec3 in\cf2 \strokec2  df_eval.columns \cf3 \strokec3 for\cf2 \strokec2  c \cf3 \strokec3 in\cf2 \strokec2  shapley_cols):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     df_eval[\cf7 \strokec7 "Shapley_sum"\cf2 \strokec2 ] \strokec6 =\strokec2  df_eval[shapley_cols].sum(\cf11 \strokec11 axis\cf2 \strokec6 =\cf13 \strokec13 1\cf2 \strokec2 , \cf11 \strokec11 min_count\cf2 \strokec6 =\cf13 \strokec13 1\cf2 \strokec2 )\cb1 \
+\cb4     df_eval[\cf7 \strokec7 "Shapley_residual"\cf2 \strokec2 ] \strokec6 =\strokec2  df_eval[\cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 ] \strokec6 -\strokec2  df_eval[\cf7 \strokec7 "Shapley_sum"\cf2 \strokec2 ]\cb1 \
+\cb4     df_eval[\cf7 \strokec7 "Shapley_residual"\cf2 \strokec2 ].describe().to_csv(FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "shapley_consistency_stats.csv"\cf2 \strokec2 )\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 else\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     pd.Series(\cb1 \
+\cb4         \{\cf7 \strokec7 "note"\cf2 \strokec2 : \cf7 \strokec7 "Shapley_* columns not found; shapley consistency step skipped."\cf2 \strokec2 \}\cb1 \
+\cb4     ).to_csv(FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "shapley_consistency_stats.csv"\cf2 \strokec2 )\cb1 \
+\
+\cb4 df_eval[\cf7 \strokec7 "MeanAxisScore"\cf2 \strokec2 ] \strokec6 =\strokec2  df_eval[[\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2  \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES]].mean(\cf11 \strokec11 axis\cf2 \strokec6 =\cf13 \strokec13 1\cf2 \strokec2 )\cb1 \
+\cb4 df_eval[\cf7 \strokec7 "Synergy"\cf2 \strokec2 ] \strokec6 =\strokec2  df_eval[\cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 ] \strokec6 -\strokec2  df_eval[\cf7 \strokec7 "MeanAxisScore"\cf2 \strokec2 ]\cb1 \
+\
+\cb4 plt.figure(\cf11 \strokec11 figsize\cf2 \strokec6 =\strokec2 (\cf13 \strokec13 7\cf2 \strokec2 , \cf13 \strokec13 4\cf2 \strokec2 ))\cb1 \
+\cb4 sns.histplot(df_eval[\cf7 \strokec7 "Synergy"\cf2 \strokec2 ].dropna(), \cf11 \strokec11 bins\cf2 \strokec6 =\cf13 \strokec13 30\cf2 \strokec2 , \cf11 \strokec11 kde\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 )\cb1 \
+\cb4 plt.title(\cf7 \strokec7 "Synergy Effect Distribution (EmergenceScore \uc0\u8722  Mean Axis Score)"\cf2 \strokec2 )\cb1 \
+\cb4 plt.tight_layout()\cb1 \
+\cb4 plt.savefig(FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "synergy_distribution.png"\cf2 \strokec2 , \cf11 \strokec11 dpi\cf2 \strokec6 =\strokec2 DPI, \cf11 \strokec11 bbox_inches\cf2 \strokec6 =\cf7 \strokec7 "tight"\cf2 \strokec2 )\cb1 \
+\cb4 plt.close()\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 3) NLP GRAPH \'97 READABLE Program\'96Axis Bipartite Network\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 EDGE_THRESHOLD \strokec6 =\strokec2  \cf13 \strokec13 0.65\cf2 \cb1 \strokec2 \
+\cb4 TOP_PROGRAMS \strokec6 =\strokec2  \cf13 \strokec13 120\cf2 \cb1 \strokec2 \
+\
+\cb4 df_graph \strokec6 =\strokec2  (\cb1 \
+\cb4     df_eval[[\cf7 \strokec7 "Program"\cf2 \strokec2 , \cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 ] \strokec6 +\strokec2  [\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2  \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES]]\cb1 \
+\cb4     .dropna(\cf11 \strokec11 subset\cf2 \strokec6 =\strokec2 [\cf7 \strokec7 "Program"\cf2 \strokec2 ])\cb1 \
+\cb4     .sort_values(\cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 , \cf11 \strokec11 ascending\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\cb4     .head(TOP_PROGRAMS)\cb1 \
+\cb4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # Build Graph\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 G \strokec6 =\strokec2  nx.Graph()\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     G.add_node(a, \cf11 \strokec11 node_type\cf2 \strokec6 =\cf7 \strokec7 "axis"\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  _, row \cf3 \strokec3 in\cf2 \strokec2  df_graph.iterrows():\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     prog \strokec6 =\strokec2  \cf12 \strokec12 str\cf2 \strokec2 (row[\cf7 \strokec7 "Program"\cf2 \strokec2 ]).strip()\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  prog:\cb1 \
+\cb4         \cf3 \strokec3 continue\cf2 \cb1 \strokec2 \
+\
+\cb4     G.add_node(prog, \cf11 \strokec11 node_type\cf2 \strokec6 =\cf7 \strokec7 "program"\cf2 \strokec2 )\cb1 \
+\
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES:\cb1 \
+\cb4         s \strokec6 =\strokec2  row.get(\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2 )\cb1 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  pd.notna(s) \cf7 \strokec7 and\cf2 \strokec2  \cf12 \strokec12 float\cf2 \strokec2 (s) \strokec6 >=\strokec2  EDGE_THRESHOLD:\cb1 \
+\cb4             G.add_edge(prog, a, \cf11 \strokec11 weight\cf2 \strokec6 =\cf12 \strokec12 float\cf2 \strokec2 (s), \cf11 \strokec11 axis\cf2 \strokec6 =\strokec2 a)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # Layout (Axis ring + program jitter)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 pos \strokec6 =\strokec2  \{\}\cb1 \
+\cb4 theta \strokec6 =\strokec2  np.linspace(\cf13 \strokec13 0\cf2 \strokec2 , \cf13 \strokec13 2\cf2 \strokec2  \strokec6 *\strokec2  np.pi, \cf10 \strokec10 len\cf2 \strokec2 (AXES), \cf11 \strokec11 endpoint\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a, t \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 zip\cf2 \strokec2 (AXES, theta):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     pos[a] \strokec6 =\strokec2  np.array([np.cos(t), np.sin(t)])\cb1 \
+\
+\cb4 rng \strokec6 =\strokec2  np.random.default_rng(\cf13 \strokec13 42\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  n, d \cf3 \strokec3 in\cf2 \strokec2  G.nodes(\cf11 \strokec11 data\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  d.get(\cf7 \strokec7 "node_type"\cf2 \strokec2 ) \strokec6 ==\strokec2  \cf7 \strokec7 "program"\cf2 \strokec2 :\cb1 \
+\cb4         edges \strokec6 =\strokec2  \cf12 \strokec12 list\cf2 \strokec2 (G.edges(n, \cf11 \strokec11 data\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ))\cb1 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  edges:\cb1 \
+\cb4             best_axis \strokec6 =\strokec2  \cf10 \strokec10 max\cf2 \strokec2 (edges, \cf11 \strokec11 key\cf2 \strokec6 =\cf7 \strokec7 lambda\cf2 \strokec2  \cf11 \strokec11 x\cf2 \strokec2 : x[\cf13 \strokec13 2\cf2 \strokec2 ][\cf7 \strokec7 "weight"\cf2 \strokec2 ])[\cf13 \strokec13 1\cf2 \strokec2 ]\cb1 \
+\cb4             pos[n] \strokec6 =\strokec2  pos[best_axis] \strokec6 +\strokec2  rng.normal(\cf11 \strokec11 scale\cf2 \strokec6 =\cf13 \strokec13 0.25\cf2 \strokec2 , \cf11 \strokec11 size\cf2 \strokec6 =\cf13 \strokec13 2\cf2 \strokec2 )\cb1 \
+\cb4         \cf3 \strokec3 else\cf2 \strokec2 :\cb1 \
+\cb4             pos[n] \strokec6 =\strokec2  rng.normal(\cf11 \strokec11 scale\cf2 \strokec6 =\cf13 \strokec13 0.3\cf2 \strokec2 , \cf11 \strokec11 size\cf2 \strokec6 =\cf13 \strokec13 2\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # Plot\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 plt.figure(\cf11 \strokec11 figsize\cf2 \strokec6 =\strokec2 (\cf13 \strokec13 14\cf2 \strokec2 , \cf13 \strokec13 14\cf2 \strokec2 ))\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Program nodes\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 nx.draw_networkx_nodes(\cb1 \
+\cb4     G, pos,\cb1 \
+\cb4     \cf11 \strokec11 nodelist\cf2 \strokec6 =\strokec2 [n \cf3 \strokec3 for\cf2 \strokec2  n, d \cf3 \strokec3 in\cf2 \strokec2  G.nodes(\cf11 \strokec11 data\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ) \cf3 \strokec3 if\cf2 \strokec2  d.get(\cf7 \strokec7 "node_type"\cf2 \strokec2 ) \strokec6 ==\strokec2  \cf7 \strokec7 "program"\cf2 \strokec2 ],\cb1 \
+\cb4     \cf11 \strokec11 node_size\cf2 \strokec6 =\cf13 \strokec13 60\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 node_color\cf2 \strokec6 =\cf7 \strokec7 "lightgrey"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 alpha\cf2 \strokec6 =\cf13 \strokec13 0.8\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Axis nodes\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     nx.draw_networkx_nodes(\cb1 \
+\cb4         G, pos,\cb1 \
+\cb4         \cf11 \strokec11 nodelist\cf2 \strokec6 =\strokec2 [a],\cb1 \
+\cb4         \cf11 \strokec11 node_size\cf2 \strokec6 =\cf13 \strokec13 1200\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 node_color\cf2 \strokec6 =\strokec2 AXIS_COLORS[a],\cb1 \
+\cb4         \cf11 \strokec11 label\cf2 \strokec6 =\strokec2 a\cb1 \
+\cb4     )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Edges by axis\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     edges \strokec6 =\strokec2  [(u, v) \cf3 \strokec3 for\cf2 \strokec2  u, v, d \cf3 \strokec3 in\cf2 \strokec2  G.edges(\cf11 \strokec11 data\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ) \cf3 \strokec3 if\cf2 \strokec2  d.get(\cf7 \strokec7 "axis"\cf2 \strokec2 ) \strokec6 ==\strokec2  a]\cb1 \
+\cb4     widths \strokec6 =\strokec2  [\cf13 \strokec13 2.5\cf2 \strokec2  \strokec6 *\strokec2  \cf12 \strokec12 float\cf2 \strokec2 (G[u][v][\cf7 \strokec7 "weight"\cf2 \strokec2 ]) \cf3 \strokec3 for\cf2 \strokec2  u, v \cf3 \strokec3 in\cf2 \strokec2  edges]\cb1 \
+\
+\cb4     nx.draw_networkx_edges(\cb1 \
+\cb4         G, pos,\cb1 \
+\cb4         \cf11 \strokec11 edgelist\cf2 \strokec6 =\strokec2 edges,\cb1 \
+\cb4         \cf11 \strokec11 width\cf2 \strokec6 =\strokec2 widths,\cb1 \
+\cb4         \cf11 \strokec11 edge_color\cf2 \strokec6 =\strokec2 AXIS_COLORS[a],\cb1 \
+\cb4         \cf11 \strokec11 alpha\cf2 \strokec6 =\cf13 \strokec13 0.35\cf2 \cb1 \strokec2 \
+\cb4     )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Axis labels\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 nx.draw_networkx_labels(\cb1 \
+\cb4     G, pos,\cb1 \
+\cb4     \cf11 \strokec11 labels\cf2 \strokec6 =\strokec2 \{a: a \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES\},\cb1 \
+\cb4     \cf11 \strokec11 font_size\cf2 \strokec6 =\cf13 \strokec13 12\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 font_weight\cf2 \strokec6 =\cf7 \strokec7 "bold"\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # Legend (fixed spacing)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 leg \strokec6 =\strokec2  plt.legend(\cb1 \
+\cb4     \cf11 \strokec11 title\cf2 \strokec6 =\cf7 \strokec7 "Latent Semantic Axes"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 loc\cf2 \strokec6 =\cf7 \strokec7 "lower left"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 11\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 labelspacing\cf2 \strokec6 =\cf13 \strokec13 1.25\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 borderpad\cf2 \strokec6 =\cf13 \strokec13 1.3\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 handletextpad\cf2 \strokec6 =\cf13 \strokec13 0.8\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\cb4 leg.get_title().set_fontsize(\cf13 \strokec13 13\cf2 \strokec2 )\cb1 \
+\cb4 leg.get_title().set_y(\cf13 \strokec13 1.08\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # Final touches\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 plt.title(\cb1 \
+\cb4     \cf7 \strokec7 "Semantic Network of Emerging Academic Programs and Latent Axes"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 15\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\cb4 plt.axis(\cf7 \strokec7 "off"\cf2 \strokec2 )\cb1 \
+\cb4 plt.tight_layout()\cb1 \
+\
+\cb4 plt.savefig(\cb1 \
+\cb4     FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "program_axis_bipartite_readable.png"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 dpi\cf2 \strokec6 =\strokec2 DPI,\cb1 \
+\cb4     \cf11 \strokec11 bbox_inches\cf2 \strokec6 =\cf7 \strokec7 "tight"\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\cb4 plt.close()\cb1 \
+\
+\cb4     \cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 4) NLP GRAPH \'97 Axis\'96Axis Interaction Network (Weighted)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 EDGE_WEIGHT_THRESHOLD \strokec6 =\strokec2  \cf13 \strokec13 0.08\cf2 \cb1 \strokec2 \
+\
+\cb4 H \strokec6 =\strokec2  nx.Graph()\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     H.add_node(a)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a, b \cf3 \strokec3 in\cf2 \strokec2  combinations(AXES, \cf13 \strokec13 2\cf2 \strokec2 ):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     tmp \strokec6 =\strokec2  df_eval[[\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2 , \cf7 \strokec7 f"score_\{\cf2 \strokec2 b\cf7 \strokec7 \}"\cf2 \strokec2 ]].dropna()\cb1 \
+\cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  tmp.empty:\cb1 \
+\cb4         w \strokec6 =\strokec2  \cf12 \strokec12 float\cf2 \strokec2 ((tmp[\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2 ] \strokec6 *\strokec2  tmp[\cf7 \strokec7 f"score_\{\cf2 \strokec2 b\cf7 \strokec7 \}"\cf2 \strokec2 ]).mean())\cb1 \
+\cb4         \cf3 \strokec3 if\cf2 \strokec2  w \strokec6 >=\strokec2  EDGE_WEIGHT_THRESHOLD:\cb1 \
+\cb4             H.add_edge(a, b, \cf11 \strokec11 weight\cf2 \strokec6 =\strokec2 w)\cb1 \
+\
+\cb4 centrality \strokec6 =\strokec2  \cf12 \strokec12 dict\cf2 \strokec2 (H.degree(\cf11 \strokec11 weight\cf2 \strokec6 =\cf7 \strokec7 "weight"\cf2 \strokec2 ))\cb1 \
+\cb4 cent_vals \strokec6 =\strokec2  np.array(\cf12 \strokec12 list\cf2 \strokec2 (centrality.values())) \cf3 \strokec3 if\cf2 \strokec2  centrality \cf3 \strokec3 else\cf2 \strokec2  np.array([\cf13 \strokec13 0.0\cf2 \strokec2 ])\cb1 \
+\cb4 cent_norm \strokec6 =\strokec2  (cent_vals \strokec6 -\strokec2  cent_vals.min()) \strokec6 /\strokec2  (cent_vals.max() \strokec6 -\strokec2  cent_vals.min() \strokec6 +\strokec2  \cf13 \strokec13 1e-9\cf2 \strokec2 )\cb1 \
+\
+\cb4 node_sizes \strokec6 =\strokec2  \{a: \cf13 \strokec13 1800\cf2 \strokec2  \strokec6 +\strokec2  \cf13 \strokec13 9000\cf2 \strokec2  \strokec6 *\strokec2  cent_norm[i] \cf3 \strokec3 for\cf2 \strokec2  i, a \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 enumerate\cf2 \strokec2 (centrality.keys())\}\cb1 \
+\
+\cb4 posH \strokec6 =\strokec2  nx.circular_layout(H)\cb1 \
+\
+\cb4 plt.figure(\cf11 \strokec11 figsize\cf2 \strokec6 =\strokec2 (\cf13 \strokec13 9\cf2 \strokec2 , \cf13 \strokec13 9\cf2 \strokec2 ))\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  H.nodes():\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     nx.draw_networkx_nodes(H, posH, \cf11 \strokec11 nodelist\cf2 \strokec6 =\strokec2 [a],\cb1 \
+\cb4                            \cf11 \strokec11 node_size\cf2 \strokec6 =\strokec2 node_sizes.get(a, \cf13 \strokec13 2200\cf2 \strokec2 ),\cb1 \
+\cb4                            \cf11 \strokec11 node_color\cf2 \strokec6 =\strokec2 AXIS_COLORS[a], \cf11 \strokec11 alpha\cf2 \strokec6 =\cf13 \strokec13 0.95\cf2 \strokec2 )\cb1 \
+\
+\cb4 edges \strokec6 =\strokec2  \cf12 \strokec12 list\cf2 \strokec2 (H.edges(\cf11 \strokec11 data\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ))\cb1 \
+\cb4 nx.draw_networkx_edges(\cb1 \
+\cb4     H, posH,\cb1 \
+\cb4     \cf11 \strokec11 width\cf2 \strokec6 =\strokec2 [\cf13 \strokec13 18\cf2 \strokec2  \strokec6 *\strokec2  \cf12 \strokec12 float\cf2 \strokec2 (d[\cf7 \strokec7 "weight"\cf2 \strokec2 ]) \cf3 \strokec3 for\cf2 \strokec2  _, _, d \cf3 \strokec3 in\cf2 \strokec2  edges] \cf3 \strokec3 if\cf2 \strokec2  edges \cf3 \strokec3 else\cf2 \strokec2  \cf13 \strokec13 1.0\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 edge_color\cf2 \strokec6 =\cf7 \strokec7 "black"\cf2 \strokec2 , \cf11 \strokec11 alpha\cf2 \strokec6 =\cf13 \strokec13 0.65\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\cb4 nx.draw_networkx_labels(H, posH, \cf11 \strokec11 font_size\cf2 \strokec6 =\cf13 \strokec13 11\cf2 \strokec2 , \cf11 \strokec11 font_weight\cf2 \strokec6 =\cf7 \strokec7 "bold"\cf2 \strokec2 )\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  edges:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     nx.draw_networkx_edge_labels(\cb1 \
+\cb4         H, posH,\cb1 \
+\cb4         \cf11 \strokec11 edge_labels\cf2 \strokec6 =\strokec2 \{(u, v): \cf7 \strokec7 f"\{\cf12 \strokec12 float\cf2 \strokec2 (d[\cf7 \strokec7 'weight'\cf2 \strokec2 ])\cf7 \strokec7 :.2f\}"\cf2 \strokec2  \cf3 \strokec3 for\cf2 \strokec2  u, v, d \cf3 \strokec3 in\cf2 \strokec2  edges\},\cb1 \
+\cb4         \cf11 \strokec11 font_size\cf2 \strokec6 =\cf13 \strokec13 9\cf2 \cb1 \strokec2 \
+\cb4     )\cb1 \
+\
+\cb4 plt.title(\cf7 \strokec7 "Axis\'96Axis Semantic Interaction Network\cf8 \strokec8 \\n\cf7 \strokec7 (mean(score\uc0\u7522  \'d7 score\u11388 ))"\cf2 \strokec2 , \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 13\cf2 \strokec2 )\cb1 \
+\cb4 plt.axis(\cf7 \strokec7 "off"\cf2 \strokec2 )\cb1 \
+\cb4 plt.tight_layout()\cb1 \
+\cb4 plt.savefig(FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "axis_axis_interaction_weighted.png"\cf2 \strokec2 , \cf11 \strokec11 dpi\cf2 \strokec6 =\strokec2 DPI, \cf11 \strokec11 bbox_inches\cf2 \strokec6 =\cf7 \strokec7 "tight"\cf2 \strokec2 )\cb1 \
+\cb4 plt.close()\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 5) WORLD GEOGRAPHIC MAP \'97 QUANTILE-BASED (INTERPRETABLE)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 world \strokec6 =\strokec2  gpd.read_file(WORLD_SHP)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Normalize ISO column\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 "ISO_A3"\cf2 \strokec2  \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  world.columns:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  \cf7 \strokec7 "ADM0_A3"\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  world.columns:\cb1 \
+\cb4         world[\cf7 \strokec7 "ISO_A3"\cf2 \strokec2 ] \strokec6 =\strokec2  world[\cf7 \strokec7 "ADM0_A3"\cf2 \strokec2 ]\cb1 \
+\cb4     \cf3 \strokec3 else\cf2 \strokec2 :\cb1 \
+\cb4         \cf3 \strokec3 raise\cf2 \strokec2  \cf12 \strokec12 ValueError\cf2 \strokec2 (\cf7 \strokec7 "Shapefile missing ISO_A3/ADM0_A3 columns (cannot merge by ISO3)."\cf2 \strokec2 )\cb1 \
+\
+\cb4 country_agg \strokec6 =\strokec2  (\cb1 \
+\cb4     df_eval.dropna(\cf11 \strokec11 subset\cf2 \strokec6 =\strokec2 [\cf7 \strokec7 "Country"\cf2 \strokec2 , \cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 ])\cb1 \
+\cb4     .groupby(\cf7 \strokec7 "Country"\cf2 \strokec2 , \cf11 \strokec11 as_index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )[\cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 ]\cb1 \
+\cb4     .mean()\cb1 \
+\cb4     .rename(\cf11 \strokec11 columns\cf2 \strokec6 =\strokec2 \{\cf7 \strokec7 "EmergenceScore"\cf2 \strokec2 : \cf7 \strokec7 "EmergenceMean"\cf2 \strokec2 \})\cb1 \
+\cb4 )\cb1 \
+\
+\cb4 country_agg[\cf7 \strokec7 "ISO3"\cf2 \strokec2 ] \strokec6 =\strokec2  country_agg[\cf7 \strokec7 "Country"\cf2 \strokec2 ].apply(country_to_iso3)\cb1 \
+\
+\cb4 map_df \strokec6 =\strokec2  world.merge(country_agg, \cf11 \strokec11 how\cf2 \strokec6 =\cf7 \strokec7 "left"\cf2 \strokec2 , \cf11 \strokec11 left_on\cf2 \strokec6 =\cf7 \strokec7 "ISO_A3"\cf2 \strokec2 , \cf11 \strokec11 right_on\cf2 \strokec6 =\cf7 \strokec7 "ISO3"\cf2 \strokec2 )\cb1 \
+\
+\cb4 map_df_nonnull \strokec6 =\strokec2  map_df.dropna(\cf11 \strokec11 subset\cf2 \strokec6 =\strokec2 [\cf7 \strokec7 "EmergenceMean"\cf2 \strokec2 ]).copy()\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 if\cf2 \strokec2  \cf10 \strokec10 len\cf2 \strokec2 (map_df_nonnull) \strokec6 >=\strokec2  \cf13 \strokec13 4\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     map_df_nonnull[\cf7 \strokec7 "EmergenceClass"\cf2 \strokec2 ] \strokec6 =\strokec2  pd.qcut(\cb1 \
+\cb4         map_df_nonnull[\cf7 \strokec7 "EmergenceMean"\cf2 \strokec2 ],\cb1 \
+\cb4         \cf11 \strokec11 q\cf2 \strokec6 =\cf13 \strokec13 4\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 labels\cf2 \strokec6 =\strokec2 [\cf7 \strokec7 "Low emergence"\cf2 \strokec2 , \cf7 \strokec7 "Medium emergence"\cf2 \strokec2 , \cf7 \strokec7 "High emergence"\cf2 \strokec2 , \cf7 \strokec7 "Very high emergence"\cf2 \strokec2 ]\cb1 \
+\cb4     )\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 else\cf2 \strokec2 :\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf5 \strokec5 # fallback if not enough countries for qcut\cf2 \cb1 \strokec2 \
+\cb4     map_df_nonnull[\cf7 \strokec7 "EmergenceClass"\cf2 \strokec2 ] \strokec6 =\strokec2  \cf7 \strokec7 "Insufficient data for quantiles"\cf2 \cb1 \strokec2 \
+\
+\cb4 map_df \strokec6 =\strokec2  map_df.merge(\cb1 \
+\cb4     map_df_nonnull[[\cf7 \strokec7 "ISO_A3"\cf2 \strokec2 , \cf7 \strokec7 "EmergenceClass"\cf2 \strokec2 ]],\cb1 \
+\cb4     \cf11 \strokec11 on\cf2 \strokec6 =\cf7 \strokec7 "ISO_A3"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 how\cf2 \strokec6 =\cf7 \strokec7 "left"\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\cb4 fig, ax \strokec6 =\strokec2  plt.subplots(\cf13 \strokec13 1\cf2 \strokec2 , \cf13 \strokec13 1\cf2 \strokec2 , \cf11 \strokec11 figsize\cf2 \strokec6 =\strokec2 (\cf13 \strokec13 16\cf2 \strokec2 , \cf13 \strokec13 8\cf2 \strokec2 ))\cb1 \
+\cb4 map_df.plot(\cb1 \
+\cb4     \cf11 \strokec11 column\cf2 \strokec6 =\cf7 \strokec7 "EmergenceClass"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 ax\cf2 \strokec6 =\strokec2 ax,\cb1 \
+\cb4     \cf11 \strokec11 categorical\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 legend\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 linewidth\cf2 \strokec6 =\cf13 \strokec13 0.4\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 edgecolor\cf2 \strokec6 =\cf7 \strokec7 "0.6"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 cmap\cf2 \strokec6 =\cf7 \strokec7 "viridis"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 missing_kwds\cf2 \strokec6 =\strokec2 \{\cf7 \strokec7 "color"\cf2 \strokec2 : \cf7 \strokec7 "lightgrey"\cf2 \strokec2 , \cf7 \strokec7 "label"\cf2 \strokec2 : \cf7 \strokec7 "No data available"\cf2 \strokec2 \}\cb1 \
+\cb4 )\cb1 \
+\
+\cb4 ax.set_title(\cb1 \
+\cb4     \cf7 \strokec7 "Global Patterns of Emergence Intensity in Academic Programs\cf8 \strokec8 \\n\cf7 \strokec7 (Quantile-based classification)"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 14\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\cb4 ax.axis(\cf7 \strokec7 "off"\cf2 \strokec2 )\cb1 \
+\cb4 plt.tight_layout()\cb1 \
+\cb4 plt.savefig(FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "world_emergence_choropleth_quantiles.png"\cf2 \strokec2 , \cf11 \strokec11 dpi\cf2 \strokec6 =\strokec2 DPI, \cf11 \strokec11 bbox_inches\cf2 \strokec6 =\cf7 \strokec7 "tight"\cf2 \strokec2 )\cb1 \
+\cb4 plt.close()\cb1 \
+\
+\cb4 country_agg.to_excel(FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "country_emergence_table_for_map.xlsx"\cf2 \strokec2 , \cf11 \strokec11 index\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 6) STACKED BAR \'97 TEMPORAL EVOLUTION OF EMERGING AXES (2020\'962025)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df_time \strokec6 =\strokec2  df_eval.copy()\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Extract numeric year\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 df_time[\cf7 \strokec7 "Year"\cf2 \strokec2 ] \strokec6 =\strokec2  (\cb1 \
+\cb4     df_time[YEAR_COL]\cb1 \
+\cb4     .astype(\cf12 \strokec12 str\cf2 \strokec2 )\cb1 \
+\cb4     .str.extract(\cf7 \strokec7 r\cf9 \strokec9 "\cf14 \strokec14 (\cf9 \strokec9 20\\d\cf2 \strokec6 \{2\}\cf14 \strokec14 )\cf9 \strokec9 "\cf2 \strokec2 )[\cf13 \strokec13 0\cf2 \strokec2 ]\cb1 \
+\cb4     .astype(\cf12 \strokec12 float\cf2 \strokec2 )\cb1 \
+\cb4 )\cb1 \
+\
+\cb4 df_time \strokec6 =\strokec2  df_time.dropna(\cf11 \strokec11 subset\cf2 \strokec6 =\strokec2 [\cf7 \strokec7 "Year"\cf2 \strokec2 ])\cb1 \
+\cb4 df_time[\cf7 \strokec7 "Year"\cf2 \strokec2 ] \strokec6 =\strokec2  df_time[\cf7 \strokec7 "Year"\cf2 \strokec2 ].astype(\cf12 \strokec12 int\cf2 \strokec2 )\cb1 \
+\
+\cb4 df_time \strokec6 =\strokec2  df_time[(df_time[\cf7 \strokec7 "Year"\cf2 \strokec2 ] \strokec6 >=\strokec2  \cf13 \strokec13 2020\cf2 \strokec2 ) \strokec6 &\strokec2  (df_time[\cf7 \strokec7 "Year"\cf2 \strokec2 ] \strokec6 <=\strokec2  \cf13 \strokec13 2025\cf2 \strokec2 )]\cb1 \
+\
+\cb4 score_cols \strokec6 =\strokec2  [\cf7 \strokec7 f"score_\{\cf2 \strokec2 a\cf7 \strokec7 \}"\cf2 \strokec2  \cf3 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES]\cb1 \
+\cb4 score_mat \strokec6 =\strokec2  df_time[score_cols].to_numpy(\cf11 \strokec11 dtype\cf2 \strokec6 =\cf12 \strokec12 float\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # Robust dominant-axis: rows with all-NaN => DominantAxis = NaN\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 row_all_nan \strokec6 =\strokec2  np.isnan(score_mat).all(\cf11 \strokec11 axis\cf2 \strokec6 =\cf13 \strokec13 1\cf2 \strokec2 )\cb1 \
+\cb4 dominant_idx \strokec6 =\strokec2  np.nanargmax(np.where(np.isnan(score_mat), \strokec6 -\strokec2 np.inf, score_mat), \cf11 \strokec11 axis\cf2 \strokec6 =\cf13 \strokec13 1\cf2 \strokec2 )\cb1 \
+\cb4 dominant_axis \strokec6 =\strokec2  np.array(AXES, \cf11 \strokec11 dtype\cf2 \strokec6 =\cf12 \strokec12 object\cf2 \strokec2 )[dominant_idx]\cb1 \
+\cb4 dominant_axis[row_all_nan] \strokec6 =\strokec2  np.nan\cb1 \
+\
+\cb4 df_time[\cf7 \strokec7 "DominantAxis"\cf2 \strokec2 ] \strokec6 =\strokec2  dominant_axis\cb1 \
+\cb4 df_time \strokec6 =\strokec2  df_time.dropna(\cf11 \strokec11 subset\cf2 \strokec6 =\strokec2 [\cf7 \strokec7 "DominantAxis"\cf2 \strokec2 ])\cb1 \
+\
+\cb4 stack_data \strokec6 =\strokec2  (\cb1 \
+\cb4     df_time\cb1 \
+\cb4     .groupby([\cf7 \strokec7 "Year"\cf2 \strokec2 , \cf7 \strokec7 "DominantAxis"\cf2 \strokec2 ])\cb1 \
+\cb4     .size()\cb1 \
+\cb4     .unstack(\cf11 \strokec11 fill_value\cf2 \strokec6 =\cf13 \strokec13 0\cf2 \strokec2 )\cb1 \
+\cb4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  a \cf3 \strokec3 in\cf2 \strokec2  AXES:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     \cf3 \strokec3 if\cf2 \strokec2  a \cf7 \strokec7 not\cf2 \strokec2  \cf7 \strokec7 in\cf2 \strokec2  stack_data.columns:\cb1 \
+\cb4         stack_data[a] \strokec6 =\strokec2  \cf13 \strokec13 0\cf2 \cb1 \strokec2 \
+\
+\cb4 stack_data \strokec6 =\strokec2  stack_data[AXES].sort_index()\cb1 \
+\
+\cb4 fig, ax \strokec6 =\strokec2  plt.subplots(\cf11 \strokec11 figsize\cf2 \strokec6 =\strokec2 (\cf13 \strokec13 9\cf2 \strokec2 , \cf13 \strokec13 5\cf2 \strokec2 ))\cb1 \
+\cb4 bottom \strokec6 =\strokec2  np.zeros(\cf10 \strokec10 len\cf2 \strokec2 (stack_data), \cf11 \strokec11 dtype\cf2 \strokec6 =\cf12 \strokec12 float\cf2 \strokec2 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  axis \cf3 \strokec3 in\cf2 \strokec2  AXES:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     values \strokec6 =\strokec2  stack_data[axis].to_numpy(\cf11 \strokec11 dtype\cf2 \strokec6 =\cf12 \strokec12 float\cf2 \strokec2 )\cb1 \
+\cb4     ax.bar(\cb1 \
+\cb4         stack_data.index,\cb1 \
+\cb4         values,\cb1 \
+\cb4         \cf11 \strokec11 bottom\cf2 \strokec6 =\strokec2 bottom,\cb1 \
+\cb4         \cf11 \strokec11 label\cf2 \strokec6 =\strokec2 axis,\cb1 \
+\cb4         \cf11 \strokec11 color\cf2 \strokec6 =\strokec2 AXIS_COLORS[axis],\cb1 \
+\cb4         \cf11 \strokec11 edgecolor\cf2 \strokec6 =\cf7 \strokec7 "white"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 linewidth\cf2 \strokec6 =\cf13 \strokec13 0.6\cf2 \cb1 \strokec2 \
+\cb4     )\cb1 \
+\cb4     bottom \strokec6 +=\strokec2  values\cb1 \
+\
+\cb4 ax.set_xlabel(\cf7 \strokec7 "Launch Year"\cf2 \strokec2 , \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 11\cf2 \strokec2 )\cb1 \
+\cb4 ax.set_ylabel(\cf7 \strokec7 "Number of Academic Programs"\cf2 \strokec2 , \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 11\cf2 \strokec2 )\cb1 \
+\cb4 ax.set_title(\cb1 \
+\cb4     \cf7 \strokec7 "Temporal Evolution of Emerging Academic Disciplines\cf8 \strokec8 \\n\cf7 \strokec7 "\cf2 \cb1 \strokec2 \
+\cb4     \cf7 \strokec7 "Based on Dominant Latent Semantic Axes (2020\'962025)"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 13\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 pad\cf2 \strokec6 =\cf13 \strokec13 12\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\cb4 ax.legend(\cb1 \
+\cb4     \cf11 \strokec11 title\cf2 \strokec6 =\cf7 \strokec7 "Dominant Latent Axis"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 9\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 title_fontsize\cf2 \strokec6 =\cf13 \strokec13 10\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 frameon\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\cb4 ax.set_xticks(\cf12 \strokec12 list\cf2 \strokec2 (stack_data.index))\cb1 \
+\cb4 ax.grid(\cf11 \strokec11 axis\cf2 \strokec6 =\cf7 \strokec7 "y"\cf2 \strokec2 , \cf11 \strokec11 linestyle\cf2 \strokec6 =\cf7 \strokec7 "--"\cf2 \strokec2 , \cf11 \strokec11 alpha\cf2 \strokec6 =\cf13 \strokec13 0.3\cf2 \strokec2 )\cb1 \
+\
+\cb4 plt.tight_layout()\cb1 \
+\cb4 plt.savefig(FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "stacked_bar_temporal_axes.png"\cf2 \strokec2 , \cf11 \strokec11 dpi\cf2 \strokec6 =\strokec2 DPI, \cf11 \strokec11 bbox_inches\cf2 \strokec6 =\cf7 \strokec7 "tight"\cf2 \strokec2 )\cb1 \
+\cb4 plt.close()\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # 7) CONCEPTUAL FRAMEWORK \'97 WIDE BASE & SHORTER HEIGHT PYRAMID\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ============================================================\cf2 \cb1 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  textwrap\cb1 \
+\cf3 \cb4 \strokec3 from\cf2 \strokec2  matplotlib.patches \cf3 \strokec3 import\cf2 \strokec2  Polygon, Patch\cb1 \
+\cf3 \cb4 \strokec3 import\cf2 \strokec2  matplotlib.pyplot \cf3 \strokec3 as\cf2 \strokec2  plt\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # \uc0\u55357 \u56633  Bigger figure so pyramid fully fits\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 fig, ax \strokec6 =\strokec2  plt.subplots(\cf11 \strokec11 figsize\cf2 \strokec6 =\strokec2 (\cf13 \strokec13 14\cf2 \strokec2 , \cf13 \strokec13 13\cf2 \strokec2 ))\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # PYRAMID LAYERS (TOP \uc0\u8594  BOTTOM)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ORANGE \uc0\u8594  LIGHT RED GRADIENT\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # (TOP TWO LAYERS SHORTENED)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 layers \strokec6 =\strokec2  [\cb1 \
+\cb4     (\cf7 \strokec7 "Global Drivers\cf8 \strokec8 \\n\cf7 \strokec7 & Missions\cf8 \strokec8 \\n\cf7 \strokec7 (GenAI,\cf8 \strokec8 \\n\cf7 \strokec7 Climate, Health)"\cf2 \strokec2 , \cf7 \strokec7 "#b30000"\cf2 \strokec2 ),\cb1 \
+\cb4     (\cf7 \strokec7 "Latent Disciplinary Axes\cf8 \strokec8 \\n\cf7 \strokec7 (AI, Sustainability, Cyber)"\cf2 \strokec2 , \cf7 \strokec7 "#d7301f"\cf2 \strokec2 ),\cb1 \
+\cb4     (\cf7 \strokec7 "Emergence Intensity\cf8 \strokec8 \\n\cf7 \strokec7 (Game-theoretic Emergence Score)"\cf2 \strokec2 , \cf7 \strokec7 "#ef6548"\cf2 \strokec2 ),\cb1 \
+\cb4     (\cf7 \strokec7 "Capabilities & Skills\cf8 \strokec8 \\n\cf7 \strokec7 (Technical, Analytical, Research, Industry)"\cf2 \strokec2 , \cf7 \strokec7 "#fc8d59"\cf2 \strokec2 ),\cb1 \
+\cb4     (\cf7 \strokec7 "Program Design & Interdisciplinarity\cf8 \strokec8 \\n\cf7 \strokec7 (Observed Program Structures)"\cf2 \strokec2 , \cf7 \strokec7 "#fdbb84"\cf2 \strokec2 ),\cb1 \
+\cb4     (\cf7 \strokec7 "Global & National Context\cf8 \strokec8 \\n\cf7 \strokec7 (World Map, Regional Patterns)"\cf2 \strokec2 , \cf7 \strokec7 "#fdd49e"\cf2 \strokec2 ),\cb1 \
+\cb4 ]\cb1 \
+\
+\cb4 n \strokec6 =\strokec2  \cf10 \strokec10 len\cf2 \strokec2 (layers)\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # GEOMETRY CONTROLS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 base_width \strokec6 =\strokec2  \cf13 \strokec13 6.5\cf2 \cb1 \strokec2 \
+\cb4 layer_height \strokec6 =\strokec2  \cf13 \strokec13 0.8\cf2 \cb1 \strokec2 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # DRAW TRUE PYRAMID (BOTTOM \uc0\u8594  TOP)\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \cb4 \strokec3 for\cf2 \strokec2  i, (label, color) \cf3 \strokec3 in\cf2 \strokec2  \cf10 \strokec10 enumerate\cf2 \strokec2 (layers[::\strokec6 -\cf13 \strokec13 1\cf2 \strokec2 ]):\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4     level \strokec6 =\strokec2  i\cb1 \
+\
+\cb4     w_bottom \strokec6 =\strokec2  base_width \strokec6 *\strokec2  (\cf13 \strokec13 1\cf2 \strokec2  \strokec6 -\strokec2  level \strokec6 /\strokec2  n)\cb1 \
+\cb4     w_top \strokec6 =\strokec2  base_width \strokec6 *\strokec2  (\cf13 \strokec13 1\cf2 \strokec2  \strokec6 -\strokec2  (level \strokec6 +\strokec2  \cf13 \strokec13 1\cf2 \strokec2 ) \strokec6 /\strokec2  n)\cb1 \
+\
+\cb4     y0 \strokec6 =\strokec2  level \strokec6 *\strokec2  layer_height\cb1 \
+\cb4     y1 \strokec6 =\strokec2  (level \strokec6 +\strokec2  \cf13 \strokec13 1\cf2 \strokec2 ) \strokec6 *\strokec2  layer_height\cb1 \
+\
+\cb4     poly \strokec6 =\strokec2  Polygon(\cb1 \
+\cb4         [\cb1 \
+\cb4             (\strokec6 -\strokec2 w_bottom \strokec6 /\strokec2  \cf13 \strokec13 2\cf2 \strokec2 , y0),\cb1 \
+\cb4             ( w_bottom \strokec6 /\strokec2  \cf13 \strokec13 2\cf2 \strokec2 , y0),\cb1 \
+\cb4             ( w_top \strokec6 /\strokec2  \cf13 \strokec13 2\cf2 \strokec2 , y1),\cb1 \
+\cb4             (\strokec6 -\strokec2 w_top \strokec6 /\strokec2  \cf13 \strokec13 2\cf2 \strokec2 , y1),\cb1 \
+\cb4         ],\cb1 \
+\cb4         \cf11 \strokec11 closed\cf2 \strokec6 =\cf7 \strokec7 True\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 facecolor\cf2 \strokec6 =\strokec2 color,\cb1 \
+\cb4         \cf11 \strokec11 edgecolor\cf2 \strokec6 =\cf7 \strokec7 "black"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 linewidth\cf2 \strokec6 =\cf13 \strokec13 1.1\cf2 \cb1 \strokec2 \
+\cb4     )\cb1 \
+\cb4     ax.add_patch(poly)\cb1 \
+\
+\cb4     wrapped \strokec6 =\strokec2  \cf7 \strokec7 "\cf8 \strokec8 \\n\cf7 \strokec7 "\cf2 \strokec2 .join(textwrap.wrap(label, \cf11 \strokec11 width\cf2 \strokec6 =\cf13 \strokec13 44\cf2 \strokec2 ))\cb1 \
+\cb4     ax.text(\cb1 \
+\cb4         \cf13 \strokec13 0\cf2 \strokec2 ,\cb1 \
+\cb4         (y0 \strokec6 +\strokec2  y1) \strokec6 /\strokec2  \cf13 \strokec13 2\cf2 \strokec2 ,\cb1 \
+\cb4         wrapped,\cb1 \
+\cb4         \cf11 \strokec11 ha\cf2 \strokec6 =\cf7 \strokec7 "center"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 va\cf2 \strokec6 =\cf7 \strokec7 "center"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 12\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 fontweight\cf2 \strokec6 =\cf7 \strokec7 "bold"\cf2 \strokec2 ,\cb1 \
+\cb4         \cf11 \strokec11 linespacing\cf2 \strokec6 =\cf13 \strokec13 1.25\cf2 \cb1 \strokec2 \
+\cb4     )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # SIDE ANNOTATIONS\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 ax.text(\cb1 \
+\cb4     \strokec6 -\cf13 \strokec13 3.8\cf2 \strokec2 , \cf13 \strokec13 2.8\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "Comparative Analysis\cf8 \strokec8 \\n\cf7 \strokec7 (Countries & Regions)"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 12\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 ha\cf2 \strokec6 =\cf7 \strokec7 "left"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 va\cf2 \strokec6 =\cf7 \strokec7 "center"\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\cb4 ax.text(\cb1 \
+\cb4     \cf13 \strokec13 3.1\cf2 \strokec2 , \cf13 \strokec13 1.9\cf2 \strokec2 ,\cb1 \
+\cb4     \cf7 \strokec7 "NLP-based Semantic Analysis\cf8 \strokec8 \\n\cf7 \strokec7 (Embeddings & Axes)"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 12\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 ha\cf2 \strokec6 =\cf7 \strokec7 "left"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 va\cf2 \strokec6 =\cf7 \strokec7 "center"\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # LEGEND \'97 OUTSIDE, BOTTOM RIGHT\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 legend_handles \strokec6 =\strokec2  [\cb1 \
+\cb4     Patch(\cf11 \strokec11 facecolor\cf2 \strokec6 =\strokec2 color, \cf11 \strokec11 edgecolor\cf2 \strokec6 =\cf7 \strokec7 "black"\cf2 \strokec2 , \cf11 \strokec11 label\cf2 \strokec6 =\strokec2 label.split(\cf7 \strokec7 "\cf8 \strokec8 \\n\cf7 \strokec7 "\cf2 \strokec2 )[\cf13 \strokec13 0\cf2 \strokec2 ])\cb1 \
+\cb4     \cf3 \strokec3 for\cf2 \strokec2  label, color \cf3 \strokec3 in\cf2 \strokec2  layers\cb1 \
+\cb4 ]\cb1 \
+\
+\cb4 ax.legend(\cb1 \
+\cb4     \cf11 \strokec11 handles\cf2 \strokec6 =\strokec2 legend_handles,\cb1 \
+\cb4     \cf11 \strokec11 title\cf2 \strokec6 =\cf7 \strokec7 "Conceptual Layers"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 loc\cf2 \strokec6 =\cf7 \strokec7 "lower left"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 bbox_to_anchor\cf2 \strokec6 =\strokec2 (\cf13 \strokec13 1.02\cf2 \strokec2 , \cf13 \strokec13 0.02\cf2 \strokec2 ),\cb1 \
+\cb4     \cf11 \strokec11 frameon\cf2 \strokec6 =\cf7 \strokec7 False\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 11\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 title_fontsize\cf2 \strokec6 =\cf13 \strokec13 12\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # FINAL FORMATTING\cf2 \cb1 \strokec2 \
+\cf5 \cb4 \strokec5 # ----------------------------\cf2 \cb1 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 ax.set_xlim(\strokec6 -\cf13 \strokec13 3.5\cf2 \strokec2 , \cf13 \strokec13 3.5\cf2 \strokec2 )\cb1 \
+\cb4 ax.set_ylim(\cf13 \strokec13 0\cf2 \strokec2 , n \strokec6 *\strokec2  layer_height \strokec6 +\strokec2  \cf13 \strokec13 0.4\cf2 \strokec2 )\cb1 \
+\cb4 ax.axis(\cf7 \strokec7 "off"\cf2 \strokec2 )\cb1 \
+\
+\cb4 ax.set_title(\cb1 \
+\cb4     \cf7 \strokec7 "Conceptual Framework of Emerging Academic Disciplines\cf8 \strokec8 \\n\cf7 \strokec7 "\cf2 \cb1 \strokec2 \
+\cb4     \cf7 \strokec7 "Integrating NLP, Game Theory, and Comparative Higher Education Analysis"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontsize\cf2 \strokec6 =\cf13 \strokec13 14\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 fontweight\cf2 \strokec6 =\cf7 \strokec7 "bold"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 pad\cf2 \strokec6 =\cf13 \strokec13 22\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 loc\cf2 \strokec6 =\cf7 \strokec7 "center"\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\
+\cb4 plt.tight_layout()\cb1 \
+\cb4 plt.savefig(\cb1 \
+\cb4     FIG_DIR \strokec6 /\strokec2  \cf7 \strokec7 "conceptual_framework_pyramid_wide_short.png"\cf2 \strokec2 ,\cb1 \
+\cb4     \cf11 \strokec11 dpi\cf2 \strokec6 =\strokec2 DPI,\cb1 \
+\cb4     \cf11 \strokec11 bbox_inches\cf2 \strokec6 =\cf7 \strokec7 "tight"\cf2 \cb1 \strokec2 \
+\cb4 )\cb1 \
+\cb4 plt.close()\cb1 \
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 "ALL ANALYSIS & VISUALIZATIONS COMPLETED SUCCESSFULLY."\cf2 \strokec2 )\cb1 \
+\cf10 \cb4 \strokec10 print\cf2 \strokec2 (\cf7 \strokec7 "Figures saved in:"\cf2 \strokec2 , FIG_DIR)\cb1 \
+\
+}
